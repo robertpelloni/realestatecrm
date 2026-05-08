@@ -78,9 +78,9 @@
     78|
 
 ## Phase 10 — BS&A and Realcomp data support
+
 - BS&A data integration
 - Realcomp data integration
 - Other approved property-data sources
 - Offer and listing draft prefill
 - Source provenance and review controls
-
