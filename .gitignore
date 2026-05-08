@@ -36,3 +36,5 @@ coverage/
 .expo/
 android/.gradle/
 ios/Pods/
+
+/src/generated/prisma

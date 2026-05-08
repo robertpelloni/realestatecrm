@@ -12,3 +12,5 @@
 ## Known Bugs / Tech Debt
 
 - N/A (Project is in initial scaffold phase)
+
+- [x] Scaffold dashboard and CRM core entities (Prisma).

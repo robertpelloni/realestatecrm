@@ -2,16 +2,14 @@
 
 ## Session History & Findings
 **Current Session:**
-- Set up GitHub Actions CI workflow for linting and building (`.github/workflows/ci.yml`).
-- Installed `next-auth`.
-- Scaffolded basic NextAuth configuration (`src/lib/auth.ts`) using CredentialsProvider.
-- Created NextAuth API route (`src/app/api/auth/[...nextauth]/route.ts`).
-- Created a custom luxury-themed sign-in page (`src/app/auth/signin/page.tsx`).
-- Updated `TODO.md` to reflect the completion of CI/CD and RBAC scaffolding.
-- Bumped version to 0.5.0.
+- Installed Prisma ORM and generated initial `schema.prisma` with core entities: `User`, `Workspace`, `WorkspaceMember`, `Contact`, `Lead`, `Deal`.
+- Created the main dashboard shell layout (`src/app/(dashboard)/layout.tsx`) utilizing the luxury theme.
+- Scaffoloded the dashboard home page (`src/app/(dashboard)/page.tsx`) with mock data widgets (New Leads, Active Deals, Recent Activity).
+- Updated `TODO.md` and `CHANGELOG.md` to reflect Phase 1 and early Phase 2 progress.
+- Bumped version to 0.6.0.
 
 **Next Steps for Next Model:**
 - Read the newly created docs and codebase.
-- Review `TODO.md` and `ROADMAP.md`.
-- Now that Phase 1 (Foundation) is mostly complete (Repo scaffold, auth, UI theme), begin looking into "Phase 2 - Communication and workflow".
-- Start scaffolding the dashboard and CRM core entities (Leads, Contacts, Deals, Tasks) along with a database provider (e.g., Prisma).
+- The next step is to connect the actual database (e.g., Supabase Postgres or Neon) and run `prisma migrate dev`.
+- After connecting the database, start wiring up the dashboard mock components to real Prisma queries (e.g., fetch real Leads and Deals).
+- Continue building out "Phase 2 - Communication and workflow".

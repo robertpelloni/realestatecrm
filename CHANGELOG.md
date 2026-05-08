@@ -22,3 +22,7 @@
 ## [0.5.0] - Authentication & CI/CD Scaffold
 - Created GitHub Actions CI workflow for lint and build.
 - Installed NextAuth and created the NextAuth configuration, route handler, and sign-in page.
+
+## [0.6.0] - Database & Dashboard Scaffold
+- Initialized Prisma and defined core schema (User, Workspace, Contact, Lead, Deal).
+- Scaffolded the base dashboard shell layout and home page.

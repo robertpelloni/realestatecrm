@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(AGENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  workspaces    WorkspaceMember[]
+  leads         Lead[]
+  contacts      Contact[]
+  deals         Deal[]
+}
+
+enum Role {
+  ADMIN
+  BROKER
+  AGENT
+  PARTNER
+  CLIENT
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     WorkspaceMember[]
+  leads       Lead[]
+  contacts    Contact[]
+  deals       Deal[]
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        Role     @default(AGENT)
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String?
+  email       String?
+  phone       String?
+  workspaceId String
+  userId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id])
+  leads       Lead[]
+  deals       Deal[]
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  source      String?
+  status      LeadStatus @default(NEW)
+  score       Int?     @default(0)
+  workspaceId String
+  contactId   String
+  userId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  NURTURE
+  LOST
+}
+
+model Deal {
+  id          String   @id @default(cuid())
+  title       String
+  value       Float?
+  stage       DealStage @default(LEAD)
+  workspaceId String
+  contactId   String
+  userId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id])
+}
+
+enum DealStage {
+  LEAD
+  APPOINTMENT
+  ACTIVE
+  UNDER_CONTRACT
+  CLOSED
+  LOST
+}
