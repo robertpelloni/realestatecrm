@@ -188,10 +188,85 @@
    188|- sync to CRM timeline and tasks
    189|- retain draft version history for edits
    190|
-   191|### 6. Ongoing maintenance
-   192|- update status changes
-   193|- log price changes and remarks edits
-   194|- track showing activity and offers
-   195|- maintain all source references and sync timestamps
-   196|
-   197|
+### 6. Ongoing maintenance
+- update status changes
+- log price changes and remarks edits
+- track showing activity and offers
+- maintain all source references and sync timestamps
+
+## Exact UI screen flows
+
+### Offer Draft Screen
+Purpose: give the agent one place to build, review, and send an offer without losing source context.
+
+#### Layout
+- **Top bar**: back, property name, status chip, save state, share/export, more actions
+- **Left panel**: buyer/contact summary, assigned agent, deal stage, source data badge
+- **Center workspace**: offer form sections
+- **Right panel**: property facts, comparable notes, compliance warnings, activity timeline
+- **Bottom action bar**: Save Draft, Generate Package, Request Review, Send for Signature, Submit
+
+#### Screen flow
+1. Agent opens a property or buyer from CRM, then clicks **Create Offer**.
+2. The screen opens with buyer, property, and source data already linked.
+3. The form pre-fills known fields from approved sources and marks each field by source.
+4. The agent edits price, terms, contingencies, financing, deadlines, and special instructions.
+5. The right panel shows missing fields, conflicts, and stale data warnings.
+6. The agent opens the comparable notes drawer if they want to add support for pricing.
+7. The agent clicks **Request Review** for broker/team lead approval when needed.
+8. After approval, the agent clicks **Generate Package** or **Send for Signature**.
+9. The system logs every change, saves a version, and writes the offer back to the CRM timeline.
+
+#### Primary buttons
+- **Save Draft**
+- **Generate Package**
+- **Request Review**
+- **Send for Signature**
+- **Submit**
+- **Attach Supporting Docs**
+- **Add Comparable Note**
+- **Add Workflow Step**
+
+#### Mobile version
+- sticky bottom action bar
+- collapsible sections for buyer, property, and terms
+- review warnings shown as full-width cards
+- large Save Draft and Send buttons
+
+### Listing Entry Screen
+Purpose: let the agent enter and publish a listing with less manual re-entry while keeping source provenance visible.
+
+#### Layout
+- **Top bar**: back, listing address, status chip, sync indicator, save state
+- **Left panel**: seller/listing summary, listing agreement status, assigned team member
+- **Center workspace**: property details, pricing, remarks, media, documents, compliance
+- **Right panel**: source metadata, validation checklist, missing items, timeline
+- **Bottom action bar**: Save Draft, Validate, Preview Listing, Request Approval, Submit to MLS
+
+#### Screen flow
+1. Agent clicks **Add Listing** or opens an imported draft.
+2. The system pulls approved property facts from MLS, Realist, BS&A, Realcomp, or another allowed source.
+3. The screen shows which fields were prefilled and which still need manual entry.
+4. The agent completes pricing, remarks, disclosures, media, and required documents.
+5. The validation panel flags missing photos, conflicts, or stale data.
+6. The agent previews the public-facing listing version before approval.
+7. The agent clicks **Request Approval** when broker review is required.
+8. After approval, the agent clicks **Submit to MLS** or publish to the client portal.
+9. The system stores draft versions, sync timestamps, and source provenance in the CRM.
+
+#### Primary buttons
+- **Save Draft**
+- **Validate**
+- **Preview Listing**
+- **Request Approval**
+- **Submit to MLS**
+- **Upload Photos**
+- **Attach Documents**
+- **Add Workflow Step**
+
+#### Mobile version
+- one-thumb-first layout with sticky save/submit controls
+- photos and documents upload in a dedicated media drawer
+- validation errors shown before submit
+- offline draft persistence with sync recovery
+

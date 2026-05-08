@@ -210,12 +210,31 @@
    210|   210|
    211|   211|
    212|
-   213|## 13. Offer and listing entry workflow maps
-   214|
-   215|The product should include two major guided workflows:
-   216|- offer workflow map
-   217|- listing entry workflow map
-   218|
-   219|Both workflows must support authorized external property data, human review gates, provenance tracking, and synced CRM updates.
-   220|
-   221|
+## 13. Offer and listing entry workflow maps
+
+The product should include two major guided workflows:
+- offer workflow map
+- listing entry workflow map
+
+Both workflows must support authorized external property data, human review gates, provenance tracking, and synced CRM updates.
+
+## 14. Exact UI screen flows
+
+### Offer Draft Screen
+- open from a property, buyer, or deal record
+- prefill fields from approved source data
+- show source labels and timestamps beside imported values
+- show compliance warnings before send
+- support approval, package generation, and signature sending
+- write every version back to the CRM timeline
+- keep Add Workflow / Add Step controls visible
+
+### Listing Entry Screen
+- open from a new listing button or imported draft
+- prefill property facts from approved sources
+- show missing fields, conflicts, and stale data warnings
+- support media upload, disclosures, and document attachment
+- support preview, approval, and MLS submission
+- keep source provenance visible before final publish
+- keep Add Workflow / Add Step controls visible
+

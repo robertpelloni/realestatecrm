@@ -226,25 +226,38 @@
    226|   226|
    227|   227|
    228|
-   229|## 14. Guided workflow maps
-   230|
-   231|### Offer workflow
-   232|- source gathering
-   233|- draft generation
-   234|- compliance review
-   235|- send / sign / track
-   236|- CRM writeback
-   237|
-   238|### Listing entry workflow
-   239|- listing draft creation
-   240|- data prefill
-   241|- media / document attachment
-   242|- validation and review
-   243|- submission and sync
-   244|
-   245|### Requirements
-   246|- each step must persist draft state
-   247|- each step must preserve source metadata
-   248|- each final action must require the appropriate permission and review
-   249|
-   250|
+## 14. Guided workflow maps
+
+### Offer workflow
+- source gathering
+- draft generation
+- compliance review
+- send / sign / track
+- CRM writeback
+
+### Listing entry workflow
+- listing draft creation
+- data prefill
+- media / document attachment
+- validation and review
+- submission and sync
+
+### Requirements
+- each step must persist draft state
+- each step must preserve source metadata
+- each final action must require the appropriate permission and review
+
+## 15. UI screen architecture for guided workflows
+
+### Offer Draft Screen implementation
+- route example: `/deals/:id/offer-draft`
+- shared components: record header, source badge list, validation panel, notes drawer, approval rail, action bar
+- state model: draft version, source provenance, validation errors, review status, send status
+- mobile adaptation: collapse side panels into drawers and keep primary actions sticky
+
+### Listing Entry Screen implementation
+- route example: `/listings/:id/entry`
+- shared components: record header, property form, media uploader, validation checklist, source provenance panel, approval rail, action bar
+- state model: draft version, imported source fields, unresolved conflicts, approval status, submission status
+- mobile adaptation: single-column sections with sticky save/submit controls and offline draft queue
+
