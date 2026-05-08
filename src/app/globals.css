@@ -1,0 +1,67 @@
+@import 'tailwindcss';
+
+:root {
+  /* Luxury Black/Blue/Gold Theme - Light Mode */
+  --background: #f8fafc; /* Very light blue-gray */
+  --foreground: #0f172a; /* Slate 900 */
+
+  --primary: #1e3a8a; /* Deep Blue */
+  --primary-foreground: #ffffff;
+
+  --secondary: #d4af37; /* Metallic Gold */
+  --secondary-foreground: #000000;
+
+  --accent: #1e293b; /* Slate 800 */
+  --accent-foreground: #ffffff;
+
+  --muted: #f1f5f9; /* Slate 100 */
+  --muted-foreground: #64748b; /* Slate 500 */
+
+  --border: #e2e8f0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Luxury Black/Blue/Gold Theme - Dark Mode */
+    --background: #000000; /* Pure Black */
+    --foreground: #f8fafc; /* Light Slate */
+
+    --primary: #0ea5e9; /* Light Blue for contrast */
+    --primary-foreground: #ffffff;
+
+    --secondary: #d4af37; /* Metallic Gold */
+    --secondary-foreground: #000000;
+
+    --accent: #1e293b; /* Slate 800 */
+    --accent-foreground: #ffffff;
+
+    --muted: #0f172a; /* Slate 900 */
+    --muted-foreground: #94a3b8; /* Slate 400 */
+
+    --border: #1e293b;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  @apply antialiased;
+}
