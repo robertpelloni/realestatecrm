@@ -85,10 +85,10 @@
 ## BS&A / Realcomp / source-data instruction
 
 Also support draft workflows that use BS&A, Realcomp, and other approved property-data sources to:
+
 - prepare offers
 - prefill listing entry forms
 - generate comparable notes
 - verify property facts
 
 The system must preserve provenance, require human review, and respect all provider terms and licenses.
-
