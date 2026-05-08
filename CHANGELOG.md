@@ -26,3 +26,7 @@
 ## [0.6.0] - Database & Dashboard Scaffold
 - Initialized Prisma and defined core schema (User, Workspace, Contact, Lead, Deal).
 - Scaffolded the base dashboard shell layout and home page.
+
+## [0.7.0] - Leads & Deals UI Scaffold
+- Created Leads list view (`leads/page.tsx`).
+- Created Deals kanban pipeline view (`deals/page.tsx`).

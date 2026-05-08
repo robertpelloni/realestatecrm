@@ -14,3 +14,4 @@
 - N/A (Project is in initial scaffold phase)
 
 - [x] Scaffold dashboard and CRM core entities (Prisma).
+- [x] Scaffold Leads and Deals UI.

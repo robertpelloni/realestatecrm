@@ -2,14 +2,14 @@
 
 ## Session History & Findings
 **Current Session:**
-- Installed Prisma ORM and generated initial `schema.prisma` with core entities: `User`, `Workspace`, `WorkspaceMember`, `Contact`, `Lead`, `Deal`.
-- Created the main dashboard shell layout (`src/app/(dashboard)/layout.tsx`) utilizing the luxury theme.
-- Scaffoloded the dashboard home page (`src/app/(dashboard)/page.tsx`) with mock data widgets (New Leads, Active Deals, Recent Activity).
-- Updated `TODO.md` and `CHANGELOG.md` to reflect Phase 1 and early Phase 2 progress.
-- Bumped version to 0.6.0.
+- Created the Leads view (`src/app/(dashboard)/leads/page.tsx`) with a mock table, search, and status filter.
+- Created the Deals view (`src/app/(dashboard)/deals/page.tsx`) with a mock Kanban board pipeline.
+- Bumped version to 0.7.0.
+- Updated `TODO.md` and `CHANGELOG.md` to reflect the UI scaffolding.
 
 **Next Steps for Next Model:**
 - Read the newly created docs and codebase.
-- The next step is to connect the actual database (e.g., Supabase Postgres or Neon) and run `prisma migrate dev`.
-- After connecting the database, start wiring up the dashboard mock components to real Prisma queries (e.g., fetch real Leads and Deals).
-- Continue building out "Phase 2 - Communication and workflow".
+- The UI scaffold for Phase 2 is progressing. The next logical step is to set up a real PostgreSQL database (e.g., Supabase or Neon).
+- Configure the `.env` file with `DATABASE_URL`.
+- Run `npx prisma db push` or `npx prisma migrate dev` to create the schema in the real database.
+- Once the database is connected, replace the mock data in the dashboard, leads, and deals pages with actual server-side data fetching using Prisma Client.
