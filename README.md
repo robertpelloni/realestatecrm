@@ -102,6 +102,7 @@ The platform should support authorized use of BS&A property information, Realcom
 - keeping source attribution and timestamps visible
 
 ### Supported source types
+
 - BS&A property / tax data where licensed and authorized
 - Realcomp / MLS listing data where licensed and authorized
 - prior MLS records
@@ -109,9 +110,9 @@ The platform should support authorized use of BS&A property information, Realcom
 - other approved property information sources
 
 ### Guardrails
+
 - respect provider terms and licenses
 - preserve provenance, timestamps, and source labels
 - require user review before submission or publication
 - keep imported data separate from final submitted data
 - audit all edits and imports
-

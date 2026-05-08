@@ -97,108 +97,110 @@
     97|    97|    97|- Conversation summaries
     98|    98|    98|- Feedback-based improvement
     99|    99|    99|- Memory privacy controls
-   100|   100|   100|
-   101|   101|   101|### Marketing studio
-   102|   102|   102|- Flyers
-   103|   103|   103|- Postcards
-   104|   104|   104|- Door hangers
-   105|   105|   105|- Business cards
-   106|   106|   106|- Social creatives
-   107|   107|   107|- Videos
-   108|   108|   108|- Finished outputs instead of raw prompts
-   109|   109|   109|
-   110|   110|   110|### AI promotional video pipeline
-   111|   111|   111|- Upload property photos
-   112|   112|   112|- Select campaign template
-   113|   113|   113|- Auto-order image sequence
-   114|   114|   114|- Generate script/caption track
-   115|   115|   115|- Add voiceover/music/transitions
-   116|   116|   116|- Render draft video
-   117|   117|   117|- Review and export
-   118|   118|   118|
-   119|   119|   119|### Client portal
-   120|   120|   120|- Login / invite access
-   121|   121|   121|- Property search
-   122|   122|   122|- Saved listings
-   123|   123|   123|- Showing requests
-   124|   124|   124|- Document exchange
-   125|   125|   125|- Deal progress
-   126|   126|   126|- Chat
-   127|   127|   127|- Request tracking
-   128|   128|   128|
-   129|   129|   129|### Partner modules
-   130|   130|   130|- Mortgage
-   131|   131|   131|- Title
-   132|   132|   132|- Insurance
-   133|   133|   133|- Vendors and other adjacent businesses
-   134|   134|   134|- Shared referrals and access rules
-   135|   135|   135|
-   136|   136|   136|## 7. UX requirements
-   137|   137|   137|- Luxury visual style
-   138|   138|   138|- High readability
-   139|   139|   139|- Simple navigation
-   140|   140|   140|- Easy access to settings and appearance controls
-   141|   141|   141|- Clear role-based views
-   142|   142|   142|- Mobile-first dependability for on-the-go work
-   143|   143|   143|
-   144|   144|   144|## 8. Success metrics
-   145|   145|   145|- Faster lead response times
-   146|   146|   146|- Higher lead qualification accuracy
-   147|   147|   147|- Higher appointment set rate
-   148|   148|   148|- Lower missed follow-ups
-   149|   149|   149|- Better content production speed
-   150|   150|   150|- Fewer manual sync issues on mobile
-   151|   151|   151|- High user adoption across roles
-   152|   152|   152|
-   153|   153|   153|## 9. Primary product principles
-   154|   154|   154|- Be modular
-   155|   155|   155|- Be extensible
-   156|   156|   156|- Be readable
-   157|   157|   157|- Be role-aware
-   158|   158|   158|- Be dependable on mobile
-   159|   159|   159|- Keep workflow creation visible and easy
-   160|   160|   160|- Make AI helpful but controllable
-   161|   161|   161|
-   162|   162|   162|
-   163|   163|
-   164|   164|## 10. MiRealSource / Paragon parity goal
-   165|   165|
-   166|   166|The platform should be able to mirror the practical workflows brokers and agents use inside MiRealSource / Paragon.
-   167|   167|
-   168|   168|### Required future-facing parity areas
-   169|   169|- MLS listing search and filtering
-   170|   170|- client portal setup and sharing
-   171|   171|- offer drafting support
-   172|   172|- entering and managing listings
-   173|   173|- document / transaction handoff
-   174|   174|- multi-device workflow continuity
-   175|   175|
-   176|   176|### Design principle
-   177|   177|Treat MLS-connected operations as first-class workflows in the CRM so they can be surfaced cleanly in web, mobile, and AI assistant experiences.
-   178|   178|
-   179|   179|
-   180|
-   181|## 11. Legacy MLS and Realist workflow support
-   182|
-   183|The product should help agents work with authorized older MLS listings and Realist property information.
-   184|
-   185|### User outcomes
-   186|- prepare offers faster
-   187|- enter listings with less manual re-entry
-   188|- review old listing context
-   189|- generate comparable notes
-   190|- keep data provenance visible
-   191|
-   192|### Human-in-the-loop requirement
-   193|The system should draft and prefill, but final offer submission and final listing publication should remain under user review and approval.
-   194|
-   195|
+
+100| 100| 100|
+101| 101| 101|### Marketing studio
+102| 102| 102|- Flyers
+103| 103| 103|- Postcards
+104| 104| 104|- Door hangers
+105| 105| 105|- Business cards
+106| 106| 106|- Social creatives
+107| 107| 107|- Videos
+108| 108| 108|- Finished outputs instead of raw prompts
+109| 109| 109|
+110| 110| 110|### AI promotional video pipeline
+111| 111| 111|- Upload property photos
+112| 112| 112|- Select campaign template
+113| 113| 113|- Auto-order image sequence
+114| 114| 114|- Generate script/caption track
+115| 115| 115|- Add voiceover/music/transitions
+116| 116| 116|- Render draft video
+117| 117| 117|- Review and export
+118| 118| 118|
+119| 119| 119|### Client portal
+120| 120| 120|- Login / invite access
+121| 121| 121|- Property search
+122| 122| 122|- Saved listings
+123| 123| 123|- Showing requests
+124| 124| 124|- Document exchange
+125| 125| 125|- Deal progress
+126| 126| 126|- Chat
+127| 127| 127|- Request tracking
+128| 128| 128|
+129| 129| 129|### Partner modules
+130| 130| 130|- Mortgage
+131| 131| 131|- Title
+132| 132| 132|- Insurance
+133| 133| 133|- Vendors and other adjacent businesses
+134| 134| 134|- Shared referrals and access rules
+135| 135| 135|
+136| 136| 136|## 7. UX requirements
+137| 137| 137|- Luxury visual style
+138| 138| 138|- High readability
+139| 139| 139|- Simple navigation
+140| 140| 140|- Easy access to settings and appearance controls
+141| 141| 141|- Clear role-based views
+142| 142| 142|- Mobile-first dependability for on-the-go work
+143| 143| 143|
+144| 144| 144|## 8. Success metrics
+145| 145| 145|- Faster lead response times
+146| 146| 146|- Higher lead qualification accuracy
+147| 147| 147|- Higher appointment set rate
+148| 148| 148|- Lower missed follow-ups
+149| 149| 149|- Better content production speed
+150| 150| 150|- Fewer manual sync issues on mobile
+151| 151| 151|- High user adoption across roles
+152| 152| 152|
+153| 153| 153|## 9. Primary product principles
+154| 154| 154|- Be modular
+155| 155| 155|- Be extensible
+156| 156| 156|- Be readable
+157| 157| 157|- Be role-aware
+158| 158| 158|- Be dependable on mobile
+159| 159| 159|- Keep workflow creation visible and easy
+160| 160| 160|- Make AI helpful but controllable
+161| 161| 161|
+162| 162| 162|
+163| 163|
+164| 164|## 10. MiRealSource / Paragon parity goal
+165| 165|
+166| 166|The platform should be able to mirror the practical workflows brokers and agents use inside MiRealSource / Paragon.
+167| 167|
+168| 168|### Required future-facing parity areas
+169| 169|- MLS listing search and filtering
+170| 170|- client portal setup and sharing
+171| 171|- offer drafting support
+172| 172|- entering and managing listings
+173| 173|- document / transaction handoff
+174| 174|- multi-device workflow continuity
+175| 175|
+176| 176|### Design principle
+177| 177|Treat MLS-connected operations as first-class workflows in the CRM so they can be surfaced cleanly in web, mobile, and AI assistant experiences.
+178| 178|
+179| 179|
+180|
+181|## 11. Legacy MLS and Realist workflow support
+182|
+183|The product should help agents work with authorized older MLS listings and Realist property information.
+184|
+185|### User outcomes
+186|- prepare offers faster
+187|- enter listings with less manual re-entry
+188|- review old listing context
+189|- generate comparable notes
+190|- keep data provenance visible
+191|
+192|### Human-in-the-loop requirement
+193|The system should draft and prefill, but final offer submission and final listing publication should remain under user review and approval.
+194|
+195|
 
 ## 12. BS&A, Realcomp, and other property-data source support
 
 The product should support authorized use of BS&A, Realcomp, and other approved property sources to help agents prepare offers and enter listings.
 
 ### User outcomes
+
 - faster offer prep
 - fewer manual data entry steps
 - better property fact verification
@@ -206,5 +208,5 @@ The product should support authorized use of BS&A, Realcomp, and other approved 
 - visible source provenance for every draft
 
 ### Human-in-the-loop requirement
-The system should prefill and draft from approved sources, but final submission remains under user review and control.
 
+The system should prefill and draft from approved sources, but final submission remains under user review and control.
