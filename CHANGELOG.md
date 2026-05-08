@@ -30,3 +30,7 @@
 ## [0.7.0] - Leads & Deals UI Scaffold
 - Created Leads list view (`leads/page.tsx`).
 - Created Deals kanban pipeline view (`deals/page.tsx`).
+
+## [0.8.0] - Prisma SQLite Setup
+- Switched Prisma to use local SQLite for development.
+- Generated Prisma Client and exported a singleton in `src/lib/prisma.ts`.

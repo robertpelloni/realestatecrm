@@ -2,14 +2,15 @@
 
 ## Session History & Findings
 **Current Session:**
-- Created the Leads view (`src/app/(dashboard)/leads/page.tsx`) with a mock table, search, and status filter.
-- Created the Deals view (`src/app/(dashboard)/deals/page.tsx`) with a mock Kanban board pipeline.
-- Bumped version to 0.7.0.
-- Updated `TODO.md` and `CHANGELOG.md` to reflect the UI scaffolding.
+- Set up a local SQLite database for development using Prisma.
+- Configured `.env` with `DATABASE_URL="file:./dev.db"`.
+- Pushed the schema to the database using `npx prisma db push`.
+- Generated the Prisma Client and created a singleton instance in `src/lib/prisma.ts`.
+- Bumped version to 0.8.0.
+- Updated `CHANGELOG.md` and `HANDOFF.md`.
 
 **Next Steps for Next Model:**
 - Read the newly created docs and codebase.
-- The UI scaffold for Phase 2 is progressing. The next logical step is to set up a real PostgreSQL database (e.g., Supabase or Neon).
-- Configure the `.env` file with `DATABASE_URL`.
-- Run `npx prisma db push` or `npx prisma migrate dev` to create the schema in the real database.
-- Once the database is connected, replace the mock data in the dashboard, leads, and deals pages with actual server-side data fetching using Prisma Client.
+- Now that the database is set up, start wiring up the mock data in the dashboard (`src/app/(dashboard)/page.tsx`), leads (`src/app/(dashboard)/leads/page.tsx`), and deals (`src/app/(dashboard)/deals/page.tsx`) to actual database queries using the `prisma` client.
+- You may need to create a seed script to populate the database with some initial mock data.
+- Continue building out "Phase 2 - Communication and workflow".
