@@ -2,15 +2,15 @@
 
 ## Session History & Findings
 **Current Session:**
-- Set up a local SQLite database for development using Prisma.
-- Configured `.env` with `DATABASE_URL="file:./dev.db"`.
-- Pushed the schema to the database using `npx prisma db push`.
-- Generated the Prisma Client and created a singleton instance in `src/lib/prisma.ts`.
-- Bumped version to 0.8.0.
-- Updated `CHANGELOG.md` and `HANDOFF.md`.
+- Created a database seed script (`prisma/seed.ts`) and configured it in `package.json` using `tsx`.
+- Ran `npx prisma db seed` to populate the local SQLite dev database.
+- Refactored `src/app/(dashboard)/page.tsx` (Dashboard), `src/app/(dashboard)/leads/page.tsx` (Leads), and `src/app/(dashboard)/deals/page.tsx` (Deals) to fetch and render actual records from the database via Prisma instead of static mock data.
+- Enums in Prisma schema were converted to Strings for SQLite compatibility since SQLite does not support native enums.
+- Bumped version to 0.9.0.
 
 **Next Steps for Next Model:**
 - Read the newly created docs and codebase.
-- Now that the database is set up, start wiring up the mock data in the dashboard (`src/app/(dashboard)/page.tsx`), leads (`src/app/(dashboard)/leads/page.tsx`), and deals (`src/app/(dashboard)/deals/page.tsx`) to actual database queries using the `prisma` client.
-- You may need to create a seed script to populate the database with some initial mock data.
-- Continue building out "Phase 2 - Communication and workflow".
+- The UI is now successfully connected to the local database. The next steps involve adding interactivity.
+- Implement the "Add Lead" and "New Deal" forms/modals.
+- Scaffold out the Contact view (`src/app/(dashboard)/contacts/page.tsx`).
+- Begin work on integrating NextAuth session data into the layout (e.g., displaying the logged-in user's name).

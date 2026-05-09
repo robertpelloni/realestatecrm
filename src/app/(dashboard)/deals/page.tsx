@@ -1,4 +1,31 @@
-export default function DealsPage() {
+import prisma from "@/lib/prisma"
+
+export default async function DealsPage() {
+  const deals = await prisma.deal.findMany({
+    include: {
+      contact: true
+    },
+    orderBy: {
+      updatedAt: 'desc'
+    }
+  })
+
+  // Group deals by stage
+  const dealsByStage = deals.reduce((acc, deal) => {
+    if (!acc[deal.stage]) acc[deal.stage] = []
+    acc[deal.stage].push(deal)
+    return acc
+  }, {} as Record<string, typeof deals>)
+
+  const formatCurrency = (value: number | null) => {
+    if (!value) return '$0'
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(value)
+  }
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -20,34 +47,21 @@ export default function DealsPage() {
         <div className="flex-shrink-0 w-80 flex flex-col bg-muted/20 rounded-xl border border-border">
           <div className="p-4 border-b border-border flex justify-between items-center bg-background rounded-t-xl">
             <h3 className="font-semibold text-sm uppercase tracking-wider">Lead</h3>
-            <span className="bg-muted text-muted-foreground text-xs py-0.5 px-2 rounded-full font-medium">3</span>
+            <span className="bg-muted text-muted-foreground text-xs py-0.5 px-2 rounded-full font-medium">{dealsByStage['LEAD']?.length || 0}</span>
           </div>
           <div className="p-3 space-y-3 flex-1 overflow-y-auto">
-            {/* Card */}
-            <div className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-medium px-2 py-0.5 bg-accent/10 text-accent rounded-full border border-accent/20">Buy</span>
-                <span className="text-xs text-muted-foreground">2d ago</span>
+            {dealsByStage['LEAD']?.map(deal => (
+              <div key={deal.id} className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors">
+                <h4 className="font-bold mb-1">{deal.title}</h4>
+                <p className="text-sm text-muted-foreground mb-3">{deal.contact.firstName} {deal.contact.lastName}</p>
+                <div className="flex justify-between items-center text-sm font-medium">
+                  <span>{formatCurrency(deal.value)}</span>
+                  <div className="w-6 h-6 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-xs">
+                    {deal.contact.firstName[0]}
+                  </div>
+                </div>
               </div>
-              <h4 className="font-bold mb-1">Smith Family Home</h4>
-              <p className="text-sm text-muted-foreground mb-3">Looking in Northville, up to $650k.</p>
-              <div className="flex justify-between items-center text-sm font-medium">
-                <span>$650,000</span>
-                <div className="w-6 h-6 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-xs">S</div>
-              </div>
-            </div>
-
-            <div className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-medium px-2 py-0.5 bg-primary/10 text-primary rounded-full border border-primary/20">Sell</span>
-              </div>
-              <h4 className="font-bold mb-1">123 Elm St Listing</h4>
-              <p className="text-sm text-muted-foreground mb-3">Pre-listing appointment scheduled.</p>
-              <div className="flex justify-between items-center text-sm font-medium">
-                <span>$425,000</span>
-                <div className="w-6 h-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs">M</div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -55,23 +69,21 @@ export default function DealsPage() {
         <div className="flex-shrink-0 w-80 flex flex-col bg-muted/20 rounded-xl border border-border">
           <div className="p-4 border-b border-border flex justify-between items-center bg-background rounded-t-xl">
             <h3 className="font-semibold text-sm uppercase tracking-wider">Active</h3>
-            <span className="bg-primary/20 text-primary text-xs py-0.5 px-2 rounded-full font-medium border border-primary/30">2</span>
+            <span className="bg-primary/20 text-primary text-xs py-0.5 px-2 rounded-full font-medium border border-primary/30">{dealsByStage['ACTIVE']?.length || 0}</span>
           </div>
           <div className="p-3 space-y-3 flex-1 overflow-y-auto">
-            <div className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-medium px-2 py-0.5 bg-accent/10 text-accent rounded-full border border-accent/20">Buy</span>
-              </div>
-              <h4 className="font-bold mb-1">Johnson Purchase</h4>
-              <p className="text-sm text-muted-foreground mb-3">Writing offer on 456 Oak Ave.</p>
-              <div className="flex justify-between items-center text-sm font-medium">
-                <span>$510,000</span>
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                  <span className="text-xs text-red-500">Action Req</span>
+            {dealsByStage['ACTIVE']?.map(deal => (
+              <div key={deal.id} className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors">
+                <h4 className="font-bold mb-1">{deal.title}</h4>
+                <p className="text-sm text-muted-foreground mb-3">{deal.contact.firstName} {deal.contact.lastName}</p>
+                <div className="flex justify-between items-center text-sm font-medium">
+                  <span>{formatCurrency(deal.value)}</span>
+                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs">
+                    {deal.contact.firstName[0]}
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -79,21 +91,21 @@ export default function DealsPage() {
         <div className="flex-shrink-0 w-80 flex flex-col bg-muted/20 rounded-xl border border-border">
           <div className="p-4 border-b border-border flex justify-between items-center bg-background rounded-t-xl">
             <h3 className="font-semibold text-sm uppercase tracking-wider">Under Contract</h3>
-            <span className="bg-secondary/20 text-secondary-foreground text-xs py-0.5 px-2 rounded-full font-medium border border-secondary/30">1</span>
+            <span className="bg-secondary/20 text-secondary-foreground text-xs py-0.5 px-2 rounded-full font-medium border border-secondary/30">{dealsByStage['UNDER_CONTRACT']?.length || 0}</span>
           </div>
           <div className="p-3 space-y-3 flex-1 overflow-y-auto">
-             <div className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-medium px-2 py-0.5 bg-primary/10 text-primary rounded-full border border-primary/20">Sell</span>
-                <span className="text-xs font-bold text-green-600">Pending</span>
+            {dealsByStage['UNDER_CONTRACT']?.map(deal => (
+              <div key={deal.id} className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-bold text-green-600">Pending</span>
+                </div>
+                <h4 className="font-bold mb-1">{deal.title}</h4>
+                <p className="text-sm text-muted-foreground mb-3">{deal.contact.firstName} {deal.contact.lastName}</p>
+                <div className="flex justify-between items-center text-sm font-medium">
+                  <span>{formatCurrency(deal.value)}</span>
+                </div>
               </div>
-              <h4 className="font-bold mb-1">789 Pine Rd</h4>
-              <p className="text-sm text-muted-foreground mb-3">Inspection cleared. Appraisal ordered.</p>
-              <div className="flex justify-between items-center text-sm font-medium">
-                <span>$890,000</span>
-                <span className="text-xs text-muted-foreground">Close: Oct 15</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -101,13 +113,22 @@ export default function DealsPage() {
         <div className="flex-shrink-0 w-80 flex flex-col bg-muted/20 rounded-xl border border-border opacity-70">
           <div className="p-4 border-b border-border flex justify-between items-center bg-background rounded-t-xl">
             <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Closed</h3>
-            <span className="bg-muted text-muted-foreground text-xs py-0.5 px-2 rounded-full font-medium">12</span>
+            <span className="bg-muted text-muted-foreground text-xs py-0.5 px-2 rounded-full font-medium">{dealsByStage['CLOSED']?.length || 0}</span>
           </div>
           <div className="p-3 space-y-3 flex-1 overflow-y-auto">
-             {/* Empty placeholder for aesthetic */}
+            {dealsByStage['CLOSED']?.map(deal => (
+              <div key={deal.id} className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors">
+                <h4 className="font-bold mb-1">{deal.title}</h4>
+                <div className="flex justify-between items-center text-sm font-medium">
+                  <span>{formatCurrency(deal.value)}</span>
+                </div>
+              </div>
+            ))}
+             {(!dealsByStage['CLOSED'] || dealsByStage['CLOSED'].length === 0) && (
              <div className="border-2 border-dashed border-border rounded-lg p-4 text-center text-muted-foreground text-sm flex flex-col items-center justify-center h-24">
                 Drag deals here to close
              </div>
+             )}
           </div>
         </div>
 

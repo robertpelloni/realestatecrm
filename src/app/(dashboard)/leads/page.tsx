@@ -1,4 +1,15 @@
-export default function LeadsPage() {
+import prisma from "@/lib/prisma"
+
+export default async function LeadsPage() {
+  const leads = await prisma.lead.findMany({
+    include: {
+      contact: true
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  })
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -25,9 +36,9 @@ export default function LeadsPage() {
           />
           <select className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
             <option>All Statuses</option>
-            <option>New</option>
-            <option>Contacted</option>
-            <option>Qualified</option>
+            <option>NEW</option>
+            <option>CONTACTED</option>
+            <option>QUALIFIED</option>
           </select>
         </div>
 
@@ -44,98 +55,52 @@ export default function LeadsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {/* Mock Data Row 1 */}
-              <tr className="hover:bg-muted/10 transition-colors">
-                <td className="px-6 py-4 font-medium">Sarah Jenkins</td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-col">
-                    <span>sarah@example.com</span>
-                    <span className="text-xs text-muted-foreground">555-0192</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="px-2 py-1 bg-secondary/20 text-secondary-foreground text-xs rounded-full font-medium border border-secondary/30">
-                    NEW
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-full bg-muted rounded-full h-2 max-w-[60px]">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: "85%" }}></div>
+              {leads.map((lead) => (
+                <tr key={lead.id} className="hover:bg-muted/10 transition-colors">
+                  <td className="px-6 py-4 font-medium">{lead.contact.firstName} {lead.contact.lastName}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span>{lead.contact.email}</span>
+                      <span className="text-xs text-muted-foreground">{lead.contact.phone}</span>
                     </div>
-                    <span className="text-xs font-bold text-primary">85</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-muted-foreground">Zillow</td>
-                <td className="px-6 py-4 text-right">
-                  <button className="text-primary hover:underline text-sm font-medium">View</button>
-                </td>
-              </tr>
-
-              {/* Mock Data Row 2 */}
-              <tr className="hover:bg-muted/10 transition-colors">
-                <td className="px-6 py-4 font-medium">Michael Chen</td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-col">
-                    <span>mchen@example.com</span>
-                    <span className="text-xs text-muted-foreground">555-8472</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="px-2 py-1 bg-primary/20 text-primary text-xs rounded-full font-medium border border-primary/30">
-                    QUALIFIED
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-full bg-muted rounded-full h-2 max-w-[60px]">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: "92%" }}></div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium border ${
+                      lead.status === 'NEW' ? 'bg-secondary/20 text-secondary-foreground border-secondary/30' :
+                      lead.status === 'QUALIFIED' ? 'bg-primary/20 text-primary border-primary/30' :
+                      'bg-muted text-muted-foreground border-border'
+                    }`}>
+                      {lead.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-full bg-muted rounded-full h-2 max-w-[60px]">
+                        <div className={`h-2 rounded-full ${lead.score && lead.score > 80 ? 'bg-primary' : 'bg-primary/50'}`} style={{ width: `${lead.score || 0}%` }}></div>
+                      </div>
+                      <span className={`text-xs font-bold ${lead.score && lead.score > 80 ? 'text-primary' : 'text-muted-foreground'}`}>{lead.score}</span>
                     </div>
-                    <span className="text-xs font-bold text-primary">92</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-muted-foreground">Referral</td>
-                <td className="px-6 py-4 text-right">
-                  <button className="text-primary hover:underline text-sm font-medium">View</button>
-                </td>
-              </tr>
-
-              {/* Mock Data Row 3 */}
-              <tr className="hover:bg-muted/10 transition-colors">
-                <td className="px-6 py-4 font-medium">Emily Davis</td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-col">
-                    <span>emily.d@example.com</span>
-                    <span className="text-xs text-muted-foreground">555-3321</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full font-medium border border-border">
-                    CONTACTED
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-full bg-muted rounded-full h-2 max-w-[60px]">
-                      <div className="bg-primary/50 h-2 rounded-full" style={{ width: "45%" }}></div>
-                    </div>
-                    <span className="text-xs font-bold text-muted-foreground">45</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-muted-foreground">Website</td>
-                <td className="px-6 py-4 text-right">
-                  <button className="text-primary hover:underline text-sm font-medium">View</button>
-                </td>
-              </tr>
+                  </td>
+                  <td className="px-6 py-4 text-muted-foreground">{lead.source}</td>
+                  <td className="px-6 py-4 text-right">
+                    <button className="text-primary hover:underline text-sm font-medium">View</button>
+                  </td>
+                </tr>
+              ))}
+              {leads.length === 0 && (
+                 <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">No leads found.</td>
+                 </tr>
+              )}
             </tbody>
           </table>
         </div>
 
         <div className="p-4 border-t border-border flex items-center justify-between text-sm text-muted-foreground bg-muted/10">
-          <span>Showing 1 to 3 of 12 entries</span>
+          <span>Showing 1 to {leads.length} of {leads.length} entries</span>
           <div className="flex gap-2">
             <button className="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-50" disabled>Prev</button>
-            <button className="px-3 py-1 border border-border rounded hover:bg-muted">Next</button>
+            <button className="px-3 py-1 border border-border rounded hover:bg-muted" disabled>Next</button>
           </div>
         </div>
       </div>

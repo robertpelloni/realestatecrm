@@ -1,4 +1,23 @@
-export default function DashboardHome() {
+import prisma from "@/lib/prisma"
+
+export default async function DashboardHome() {
+  const leadsCount = await prisma.lead.count()
+  const activeDealsCount = await prisma.deal.count({
+    where: { stage: 'ACTIVE' }
+  })
+  const pipelineValueAgg = await prisma.deal.aggregate({
+    _sum: { value: true },
+    where: { stage: { notIn: ['CLOSED', 'LOST'] } }
+  })
+
+  const pipelineValue = pipelineValueAgg._sum.value || 0
+  const formattedPipelineValue = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    notation: 'compact',
+    maximumFractionDigits: 1
+  }).format(pipelineValue)
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col gap-2">
@@ -10,22 +29,22 @@ export default function DashboardHome() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-6 rounded-xl border border-border bg-background shadow-sm">
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-muted-foreground mb-1">New Leads</span>
-            <span className="text-3xl font-bold">12</span>
-            <span className="text-xs text-primary mt-2 font-medium">+2 since yesterday</span>
+            <span className="text-sm font-medium text-muted-foreground mb-1">Total Leads</span>
+            <span className="text-3xl font-bold">{leadsCount}</span>
+            <span className="text-xs text-primary mt-2 font-medium">Synced from DB</span>
           </div>
         </div>
         <div className="p-6 rounded-xl border border-border bg-background shadow-sm">
           <div className="flex flex-col">
             <span className="text-sm font-medium text-muted-foreground mb-1">Active Deals</span>
-            <span className="text-3xl font-bold">8</span>
+            <span className="text-3xl font-bold">{activeDealsCount}</span>
             <span className="text-xs text-muted-foreground mt-2">In pipeline</span>
           </div>
         </div>
         <div className="p-6 rounded-xl border border-border bg-background shadow-sm">
           <div className="flex flex-col">
             <span className="text-sm font-medium text-muted-foreground mb-1">Pipeline Value</span>
-            <span className="text-3xl font-bold">$4.2M</span>
+            <span className="text-3xl font-bold">{formattedPipelineValue}</span>
             <span className="text-xs text-muted-foreground mt-2">Estimated</span>
           </div>
         </div>

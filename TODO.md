@@ -15,3 +15,5 @@
 
 - [x] Scaffold dashboard and CRM core entities (Prisma).
 - [x] Scaffold Leads and Deals UI.
+- [x] Wire up dashboard UI with actual database data (Prisma).
+- [x] Create mock seed data script (`prisma/seed.ts`).

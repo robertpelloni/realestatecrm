@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -15,7 +16,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  role          Role      @default(AGENT)
+  role          String    @default("AGENT")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -25,13 +26,7 @@ model User {
   deals         Deal[]
 }
 
-enum Role {
-  ADMIN
-  BROKER
-  AGENT
-  PARTNER
-  CLIENT
-}
+
 
 model Workspace {
   id          String   @id @default(cuid())
@@ -49,7 +44,7 @@ model WorkspaceMember {
   id          String   @id @default(cuid())
   userId      String
   workspaceId String
-  role        Role     @default(AGENT)
+  role        String   @default("AGENT")
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -77,7 +72,7 @@ model Contact {
 model Lead {
   id          String   @id @default(cuid())
   source      String?
-  status      LeadStatus @default(NEW)
+  status      String @default("NEW")
   score       Int?     @default(0)
   workspaceId String
   contactId   String
@@ -90,19 +85,13 @@ model Lead {
   user        User?     @relation(fields: [userId], references: [id])
 }
 
-enum LeadStatus {
-  NEW
-  CONTACTED
-  QUALIFIED
-  NURTURE
-  LOST
-}
+
 
 model Deal {
   id          String   @id @default(cuid())
   title       String
   value       Float?
-  stage       DealStage @default(LEAD)
+  stage       String @default("LEAD")
   workspaceId String
   contactId   String
   userId      String?
@@ -112,13 +101,4 @@ model Deal {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
   user        User?     @relation(fields: [userId], references: [id])
-}
-
-enum DealStage {
-  LEAD
-  APPOINTMENT
-  ACTIVE
-  UNDER_CONTRACT
-  CLOSED
-  LOST
 }

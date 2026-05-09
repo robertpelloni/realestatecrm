@@ -34,3 +34,7 @@
 ## [0.8.0] - Prisma SQLite Setup
 - Switched Prisma to use local SQLite for development.
 - Generated Prisma Client and exported a singleton in `src/lib/prisma.ts`.
+
+## [0.9.0] - Database Seeding & UI Data Wiring
+- Created a mock seed script (`prisma/seed.ts`) to populate the development database.
+- Updated Dashboard, Leads, and Deals UI to fetch and render actual data from the database using Prisma.
