@@ -17,3 +17,4 @@
 - [x] Scaffold Leads and Deals UI.
 - [x] Wire up dashboard UI with actual database data (Prisma).
 - [x] Create mock seed data script (`prisma/seed.ts`).
+- [x] Implement Add Lead and New Deal forms and server actions.

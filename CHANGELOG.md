@@ -38,3 +38,7 @@
 ## [0.9.0] - Database Seeding & UI Data Wiring
 - Created a mock seed script (`prisma/seed.ts`) to populate the development database.
 - Updated Dashboard, Leads, and Deals UI to fetch and render actual data from the database using Prisma.
+
+## [0.10.0] - UI Modals & Actions
+- Created `AddLeadModal` and Server Action for creating Leads.
+- Created `AddDealModal` and Server Action for creating Deals.

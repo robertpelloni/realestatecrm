@@ -1,4 +1,27 @@
 import prisma from "@/lib/prisma"
+import AddDealModal from "@/components/AddDealModal"
+
+async function addDeal(formData: FormData) {
+  'use server'
+
+  const title = formData.get('title') as string
+  const value = formData.get('value') as string
+  const stage = formData.get('stage') as string
+  const contactId = formData.get('contactId') as string
+  const workspaceId = formData.get('workspaceId') as string
+
+  if (!title || !contactId || !workspaceId) return
+
+  await prisma.deal.create({
+    data: {
+      title,
+      value: value ? parseFloat(value) : 0,
+      stage: stage || 'LEAD',
+      workspaceId,
+      contactId
+    }
+  })
+}
 
 export default async function DealsPage() {
   const deals = await prisma.deal.findMany({
@@ -9,6 +32,9 @@ export default async function DealsPage() {
       updatedAt: 'desc'
     }
   })
+
+  const workspaces = await prisma.workspace.findMany()
+  const contacts = await prisma.contact.findMany()
 
   // Group deals by stage
   const dealsByStage = deals.reduce((acc, deal) => {
@@ -34,9 +60,7 @@ export default async function DealsPage() {
           <p className="text-muted-foreground">Track and manage your active transactions.</p>
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors">
-            + New Deal
-          </button>
+          <AddDealModal addDealAction={addDeal} workspaces={workspaces} contacts={contacts} />
         </div>
       </div>
 
@@ -56,7 +80,7 @@ export default async function DealsPage() {
                 <p className="text-sm text-muted-foreground mb-3">{deal.contact.firstName} {deal.contact.lastName}</p>
                 <div className="flex justify-between items-center text-sm font-medium">
                   <span>{formatCurrency(deal.value)}</span>
-                  <div className="w-6 h-6 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-xs">
+                  <div className="w-6 h-6 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-xs uppercase">
                     {deal.contact.firstName[0]}
                   </div>
                 </div>
@@ -78,7 +102,7 @@ export default async function DealsPage() {
                 <p className="text-sm text-muted-foreground mb-3">{deal.contact.firstName} {deal.contact.lastName}</p>
                 <div className="flex justify-between items-center text-sm font-medium">
                   <span>{formatCurrency(deal.value)}</span>
-                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs">
+                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs uppercase">
                     {deal.contact.firstName[0]}
                   </div>
                 </div>

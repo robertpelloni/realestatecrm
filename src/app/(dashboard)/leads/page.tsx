@@ -1,4 +1,35 @@
 import prisma from "@/lib/prisma"
+import AddLeadModal from "@/components/AddLeadModal"
+
+async function addLead(formData: FormData) {
+  'use server'
+
+  const firstName = formData.get('firstName') as string
+  const lastName = formData.get('lastName') as string
+  const email = formData.get('email') as string
+  const workspaceId = formData.get('workspaceId') as string
+
+  if (!firstName || !workspaceId) return
+
+  const contact = await prisma.contact.create({
+    data: {
+      firstName,
+      lastName,
+      email,
+      workspaceId
+    }
+  })
+
+  await prisma.lead.create({
+    data: {
+      status: 'NEW',
+      score: 50,
+      source: 'Manual',
+      workspaceId,
+      contactId: contact.id
+    }
+  })
+}
 
 export default async function LeadsPage() {
   const leads = await prisma.lead.findMany({
@@ -9,6 +40,8 @@ export default async function LeadsPage() {
       createdAt: 'desc'
     }
   })
+
+  const workspaces = await prisma.workspace.findMany()
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -21,9 +54,7 @@ export default async function LeadsPage() {
           <button className="px-4 py-2 bg-muted text-foreground font-medium rounded-md hover:bg-muted/80 transition-colors">
             Import
           </button>
-          <button className="px-4 py-2 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors">
-            Add Lead
-          </button>
+          <AddLeadModal addLeadAction={addLead} workspaces={workspaces} />
         </div>
       </div>
 
