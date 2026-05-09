@@ -270,3 +270,23 @@ Purpose: let the agent enter and publish a listing with less manual re-entry whi
 - validation errors shown before submit
 - offline draft persistence with sync recovery
 
+## Wireframe component maps
+
+### Offer Draft Screen component map
+- page shell
+- record header
+- left summary rail
+- offer form workspace
+- compliance / review rail
+- action bar
+- mobile sticky controls
+
+### Listing Entry Screen component map
+- page shell
+- record header
+- seller / listing summary rail
+- listing form workspace
+- validation / provenance rail
+- action bar
+- mobile media drawer and sticky submit controls
+

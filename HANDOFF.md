@@ -2,16 +2,14 @@
 
 ## Session History & Findings
 **Current Session:**
-- Set up GitHub Actions CI workflow for linting and building (`.github/workflows/ci.yml`).
-- Installed `next-auth`.
-- Scaffolded basic NextAuth configuration (`src/lib/auth.ts`) using CredentialsProvider.
-- Created NextAuth API route (`src/app/api/auth/[...nextauth]/route.ts`).
-- Created a custom luxury-themed sign-in page (`src/app/auth/signin/page.tsx`).
-- Updated `TODO.md` to reflect the completion of CI/CD and RBAC scaffolding.
-- Bumped version to 0.5.0.
+- Added exact UI screen flows for offer and listing entry.
+- Built wireframe-level component maps for the offer and listing screens.
+- Implemented Next.js workflow shell pages at `/workflows/offer-draft` and `/workflows/listing-entry`.
+- Added a reusable `WorkflowScreen` component for three-column desktop and stacked mobile layouts.
+- Updated the home page to link directly into both workflow shells.
+- Updated planning docs to include wireframe component maps and workflow shell implementation.
 
 **Next Steps for Next Model:**
-- Read the newly created docs and codebase.
-- Review `TODO.md` and `ROADMAP.md`.
-- Now that Phase 1 (Foundation) is mostly complete (Repo scaffold, auth, UI theme), begin looking into "Phase 2 - Communication and workflow".
-- Start scaffolding the dashboard and CRM core entities (Leads, Contacts, Deals, Tasks) along with a database provider (e.g., Prisma).
+- Wire the workflow shells to live CRM data and persistence.
+- Add editable forms, local draft storage, and save/update actions.
+- Continue into the broader CRM core entities and workflow engine.

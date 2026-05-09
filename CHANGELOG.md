@@ -18,7 +18,14 @@
 ## [0.4.0] - Theme & Landing Page
 - Implemented Black/Blue/Gold luxury theme in globals.css.
 - Added landing page stub matching the design identity.
-
 ## [0.5.0] - Authentication & CI/CD Scaffold
+
 - Created GitHub Actions CI workflow for lint and build.
 - Installed NextAuth and created the NextAuth configuration, route handler, and sign-in page.
+
+## [0.6.0] - Workflow Shells
+
+- Added exact UI screen flows for offer and listing entry.
+- Built reusable workflow screen components.
+- Added Next.js workflow shell pages for offer drafting and listing entry.
+- Updated the landing page to link into the workflow shells.

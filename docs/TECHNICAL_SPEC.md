@@ -261,3 +261,11 @@
 - state model: draft version, imported source fields, unresolved conflicts, approval status, submission status
 - mobile adaptation: single-column sections with sticky save/submit controls and offline draft queue
 
+### Reusable component contracts
+- `WorkflowScreen` renders the three-column desktop shell and stacked mobile layout
+- `ActionButton` handles tone-based CTA styling for workflow actions
+- `Panel` wraps each major dashboard rail or content area
+- `SectionList` renders workflow bullet lists and checklists
+- `WireframeCard` visualizes the component map layers
+- `SummaryRow` displays source-aware field summaries with provenance labels
+

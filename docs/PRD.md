@@ -238,3 +238,21 @@ Both workflows must support authorized external property data, human review gate
 - keep source provenance visible before final publish
 - keep Add Workflow / Add Step controls visible
 
+## 15. Wireframe component maps
+
+### Offer Draft Screen
+- page shell
+- top action bar
+- left buyer / property context rail
+- center offer form
+- right compliance and source rail
+- mobile sticky action bar
+
+### Listing Entry Screen
+- page shell
+- top action bar
+- left seller / listing context rail
+- center listing form and media area
+- right validation and provenance rail
+- mobile sticky save / submit controls
+
