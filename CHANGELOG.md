@@ -42,3 +42,7 @@
 ## [0.10.0] - UI Modals & Actions
 - Created `AddLeadModal` and Server Action for creating Leads.
 - Created `AddDealModal` and Server Action for creating Deals.
+
+## [0.11.0] - Contacts UI & Data Wiring
+- Scaffolded the Contacts view (`contacts/page.tsx`) connecting to Prisma.
+- Implemented `AddContactModal` and server action for creating new contacts.
