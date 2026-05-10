@@ -2,14 +2,15 @@
 
 ## Session History & Findings
 **Current Session:**
-- Extracted and implemented interactive UI components for creating data: `AddLeadModal.tsx` and `AddDealModal.tsx`.
-- Wired these components up in `leads/page.tsx` and `deals/page.tsx` with Next.js Server Actions to securely create records in the database.
-- Added data formatting for Deal values.
-- Bumped version to 0.10.0.
+- Created `src/components/Providers.tsx` containing the NextAuth `SessionProvider` and wrapped the root `src/app/layout.tsx` in it.
+- Created `src/middleware.ts` to protect all routes from unauthenticated access, except for static assets, public APIs, the landing page, and the sign-in page.
+- Updated `src/app/(dashboard)/layout.tsx` to dynamically fetch the server-side session using `getServerSession` and render the logged-in user's initials, name, and email in the sidebar.
+- Added NextAuth environment variables (`NEXTAUTH_SECRET`, `NEXTAUTH_URL`) to `.env`.
+- Bumped version to 0.12.0.
 
 **Next Steps for Next Model:**
 - Read the newly created docs and codebase.
 - Review `TODO.md` and `ROADMAP.md`.
-- NextAuth is currently scaffolded but not integrated heavily. You need to wrap the application in a `SessionProvider` (client-side) and restrict the `(dashboard)` layout to authenticated users via server-side session checks.
-- Build the `Contacts` page.
-- Expand on the CRM capabilities as per Phase 2.
+- NextAuth requires an actual authentication flow (it currently has a hardcoded mock user in `src/lib/auth.ts`). Wire up the Credentials Provider to authenticate against the Prisma database.
+- Hook up the Sign In form (`src/app/auth/signin/page.tsx`) to trigger NextAuth's `signIn` method.
+- Add a "Sign Out" button to the dashboard layout.

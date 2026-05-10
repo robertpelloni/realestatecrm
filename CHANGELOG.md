@@ -46,3 +46,8 @@
 ## [0.11.0] - Contacts UI & Data Wiring
 - Scaffolded the Contacts view (`contacts/page.tsx`) connecting to Prisma.
 - Implemented `AddContactModal` and server action for creating new contacts.
+
+## [0.12.0] - Session Management & Protected Routes
+- Added `SessionProvider` wrapper to `layout.tsx`.
+- Implemented `middleware.ts` to protect dashboard routes with NextAuth.
+- Updated `(dashboard)/layout.tsx` to display logged-in user data from NextAuth session.

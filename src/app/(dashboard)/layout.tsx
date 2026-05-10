@@ -1,8 +1,13 @@
-export default function DashboardLayout({
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await getServerSession(authOptions)
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
@@ -35,11 +40,11 @@ export default function DashboardLayout({
         <div className="p-4 border-t border-border">
           <div className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted cursor-pointer transition-colors">
             <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-medium">
-              JS
+              {session?.user?.name?.[0] || 'U'}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium">J Smith</span>
-              <span className="text-xs text-muted-foreground">Agent</span>
+              <span className="text-sm font-medium truncate max-w-[150px]">{session?.user?.name || 'User'}</span>
+              <span className="text-xs text-muted-foreground truncate max-w-[150px]">{session?.user?.email || 'user@example.com'}</span>
             </div>
           </div>
         </div>
