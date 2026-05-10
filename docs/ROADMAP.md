@@ -92,3 +92,11 @@
 - Shared workflow component library
 - Mobile-ready sticky actions and drawers
 - Dashboard links into both workflow shells
+
+## Phase 12 — Interactive workflow state
+
+- Editable form state for offer and listing workflows
+- Local draft persistence and recovery
+- Mock CRM context and activity feeds
+- Validation gates for signature and MLS submission
+- Mobile-first interactions and save behavior

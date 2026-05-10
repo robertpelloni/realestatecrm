@@ -10,6 +10,7 @@
 - [x] Scaffold authentication and role-based access control (RBAC).
 - [x] Add wireframe-level component maps for offer and listing screens.
 - [x] Build Next.js workflow shell pages for offer draft and listing entry.
+- [x] Add interactive form state, local draft persistence, and mock CRM data.
 - [ ] Connect workflow shells to live CRM data.
 - [ ] Add edit/save actions and state persistence.
 - [ ] Add mobile-specific route behavior and offline sync queue.

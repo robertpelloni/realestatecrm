@@ -29,3 +29,9 @@
 - Built reusable workflow screen components.
 - Added Next.js workflow shell pages for offer drafting and listing entry.
 - Updated the landing page to link into the workflow shells.
+
+## [0.7.0] - Interactive Workflow Shells
+
+- Added editable form state and mock CRM data to the offer and listing screens.
+- Implemented local draft persistence, validation gating, and activity feeds.
+- Added mobile-safe sticky action bars and offline-friendly recovery behavior.

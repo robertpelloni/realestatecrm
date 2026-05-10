@@ -256,3 +256,17 @@ Both workflows must support authorized external property data, human review gate
 - right validation and provenance rail
 - mobile sticky save / submit controls
 
+## 16. Interactive workflow shell requirements
+
+### Offer Draft Screen
+- editable form state with local draft persistence
+- mock CRM data visible in side rails for buyer and property context
+- validation before signature or submission actions
+- mobile-safe sticky action controls and offline recovery
+
+### Listing Entry Screen
+- editable property, pricing, and remarks form state
+- mock CRM data visible in side rails for seller and provenance context
+- validation before MLS submission
+- mobile-safe sticky action controls, media actions, and offline recovery
+

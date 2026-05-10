@@ -290,3 +290,17 @@ Purpose: let the agent enter and publish a listing with less manual re-entry whi
 - action bar
 - mobile media drawer and sticky submit controls
 
+## Interactive workflow shells
+
+### Offer Draft Screen
+- editable form state with local draft save
+- mock CRM summary rails for buyer, property, and provenance context
+- validation checks before signature or submission actions
+- mobile-safe sticky action bar and offline-friendly draft recovery
+
+### Listing Entry Screen
+- editable property, pricing, and remark fields
+- mock CRM summary rails for seller, listing, and provenance context
+- validation checks before MLS submission
+- mobile-safe sticky action bar, media actions, and offline-friendly draft recovery
+

@@ -269,3 +269,10 @@
 - `WireframeCard` visualizes the component map layers
 - `SummaryRow` displays source-aware field summaries with provenance labels
 
+### Editable workflow shell behavior
+- `WorkflowStudio` powers interactive offer and listing screens
+- local draft persistence is stored in browser storage before backend wiring
+- required fields drive inline validation and action gating
+- action buttons update activity history and user-facing banner state
+- mobile behavior uses a sticky bottom bar, stacked forms, and recovery-first draft state
+

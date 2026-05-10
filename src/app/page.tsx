@@ -76,10 +76,10 @@ export default function Home() {
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                   Project status
                 </p>
-                <p className="mt-2 text-lg font-semibold text-foreground">Workflow shells in motion</p>
+                <p className="text-lg font-semibold text-foreground">Interactive workflow shells in motion</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  The current build is focused on the exact screens the team asked for, with room to
-                  plug in real data and actions later.
+                  The current build now includes editable offer and listing shells, with room to
+                  plug in real CRM data and backend actions later.
                 </p>
               </div>
               <div className="rounded-2xl border border-border bg-muted/20 p-4">

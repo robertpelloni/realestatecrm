@@ -8,6 +8,8 @@
 - Added a reusable `WorkflowScreen` component for three-column desktop and stacked mobile layouts.
 - Updated the home page to link directly into both workflow shells.
 - Updated planning docs to include wireframe component maps and workflow shell implementation.
+- Added an interactive `WorkflowStudio` component with editable form state, local draft save, validation, activity history, and mock CRM rails.
+- Converted the offer and listing screens into interactive client-side workflow pages.
 
 **Next Steps for Next Model:**
 - Wire the workflow shells to live CRM data and persistence.
