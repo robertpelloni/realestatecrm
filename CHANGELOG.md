@@ -79,3 +79,8 @@
 - Added `react-hot-toast` to provide user feedback upon form submissions.
 - Wrapped `Providers` with the `<Toaster />` context styled for the luxury theme.
 - Configured all Modals (`AddLeadModal`, `AddDealModal`, `AddContactModal`, `AddTaskModal`) to fire a `toast.success` upon successful server action completion.
+
+## [0.19.0] - Activity Scaffolding & Dynamic List Filtering
+
+- Added URL-based search (`q`) and `status` filtering to the Leads, Contacts, and Tasks list pages, fully satisfying strict Next.js 15 `useSearchParams` patterns.
+- Scaffolded the `Activity` data model in Prisma. This lays the groundwork for the core CRM activity timeline (logging when lead states change, notes, emails, calls).

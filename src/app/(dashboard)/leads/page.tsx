@@ -46,8 +46,29 @@ async function addLead(formData: FormData) {
   }
 }
 
-export default async function LeadsPage() {
+export default async function LeadsPage(props: {
+  searchParams?: Promise<{ status?: string; q?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const query = searchParams?.q || '';
+  const statusFilter = searchParams?.status || 'ALL';
+
+  const whereClause: any = {};
+
+  if (query) {
+    whereClause.OR = [
+      { contact: { firstName: { contains: query } } },
+      { contact: { lastName: { contains: query } } },
+      { contact: { email: { contains: query } } },
+    ];
+  }
+
+  if (statusFilter && statusFilter !== 'ALL') {
+    whereClause.status = statusFilter;
+  }
+
   const leads = await prisma.lead.findMany({
+    where: whereClause,
     include: {
       contact: true,
     },
@@ -74,19 +95,32 @@ export default async function LeadsPage() {
       </div>
 
       <div className="bg-background border border-border rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex gap-4 items-center bg-muted/20">
+        <form className="p-4 border-b border-border flex gap-4 items-center bg-muted/20">
           <input
             type="text"
+            name="q"
+            defaultValue={query}
             placeholder="Search leads..."
             className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
-          <select className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
-            <option>All Statuses</option>
-            <option>NEW</option>
-            <option>CONTACTED</option>
-            <option>QUALIFIED</option>
+          <select
+            name="status"
+            defaultValue={statusFilter}
+            onChange={(e) => e.target.form?.submit()}
+            className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="NEW">NEW</option>
+            <option value="CONTACTED">CONTACTED</option>
+            <option value="QUALIFIED">QUALIFIED</option>
           </select>
-        </div>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-secondary text-secondary-foreground text-sm font-medium rounded-md hover:bg-secondary/90 transition-colors"
+          >
+            Search
+          </button>
+        </form>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">

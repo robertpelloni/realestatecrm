@@ -210,7 +210,13 @@
 209|
 210|
 
-## 13. BS&A, Realcomp, and authorized external data integration
+### Offer workflow
+
+- source gathering
+- draft generation
+- compliance review
+- send / sign / track
+- CRM writeback
 
 ### Integration goals
 

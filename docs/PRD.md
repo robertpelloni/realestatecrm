@@ -195,9 +195,12 @@
 194|
 195|
 
-## 12. BS&A, Realcomp, and other property-data source support
+The product should include two major guided workflows:
 
-The product should support authorized use of BS&A, Realcomp, and other approved property sources to help agents prepare offers and enter listings.
+- offer workflow map
+- listing entry workflow map
+
+Both workflows must support authorized external property data, human review gates, provenance tracking, and synced CRM updates.
 
 ### User outcomes
 

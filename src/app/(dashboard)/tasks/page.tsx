@@ -1,0 +1,164 @@
+import prisma from '@/lib/prisma';
+import AddTaskModal from '@/components/AddTaskModal';
+import { taskSchema } from '@/lib/validations/task';
+
+async function addTask(formData: FormData) {
+  'use server';
+
+  const rawData = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+    status: formData.get('status'),
+    workspaceId: formData.get('workspaceId'),
+  };
+
+  const validatedData = taskSchema.safeParse(rawData);
+
+  if (!validatedData.success) {
+    return { error: validatedData.error.issues[0].message };
+  }
+
+  const { title, description, status, workspaceId } = validatedData.data;
+
+  try {
+    await prisma.task.create({
+      data: {
+        title,
+        description: description || null,
+        status,
+        workspaceId,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to add task:', error);
+    return { error: 'An unexpected error occurred while saving.' };
+  }
+}
+
+export default async function TasksPage(props: {
+  searchParams?: Promise<{ status?: string; q?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const query = searchParams?.q || '';
+  const statusFilter = searchParams?.status || 'ALL';
+
+  const whereClause: any = {};
+
+  if (query) {
+    whereClause.title = { contains: query };
+  }
+
+  if (statusFilter && statusFilter !== 'ALL') {
+    whereClause.status = statusFilter;
+  }
+
+  const tasks = await prisma.task.findMany({
+    where: whereClause,
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  const workspaces = await prisma.workspace.findMany();
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
+          <p className="text-muted-foreground">Manage your daily to-dos and action items.</p>
+        </div>
+        <div className="flex gap-2">
+          <AddTaskModal addTaskAction={addTask} workspaces={workspaces} />
+        </div>
+      </div>
+
+      <div className="bg-background border border-border rounded-xl shadow-sm overflow-hidden">
+        <form className="p-4 border-b border-border flex gap-4 items-center bg-muted/20">
+          <input
+            type="text"
+            name="q"
+            defaultValue={query}
+            placeholder="Search tasks..."
+            className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <select
+            name="status"
+            defaultValue={statusFilter}
+            onChange={(e) => e.target.form?.submit()}
+            className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="TODO">To Do</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="DONE">Done</option>
+          </select>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-secondary text-secondary-foreground text-sm font-medium rounded-md hover:bg-secondary/90 transition-colors"
+          >
+            Search
+          </button>
+        </form>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="text-xs text-muted-foreground uppercase bg-muted/30">
+              <tr>
+                <th className="px-6 py-3 font-medium">Task</th>
+                <th className="px-6 py-3 font-medium">Status</th>
+                <th className="px-6 py-3 font-medium">Created</th>
+                <th className="px-6 py-3 font-medium text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {tasks.map((task) => (
+                <tr key={task.id} className="hover:bg-muted/10 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="font-medium">{task.title}</div>
+                    {task.description && (
+                      <div className="text-xs text-muted-foreground mt-1 truncate max-w-md">
+                        {task.description}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full font-medium border ${
+                        task.status === 'TODO'
+                          ? 'bg-secondary/20 text-secondary-foreground border-secondary/30'
+                          : task.status === 'IN_PROGRESS'
+                            ? 'bg-blue-500/20 text-blue-500 border-blue-500/30'
+                            : 'bg-green-500/20 text-green-500 border-green-500/30'
+                      }`}
+                    >
+                      {task.status.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-muted-foreground">
+                    {new Date(task.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-right flex justify-end gap-3">
+                    <button className="text-muted-foreground hover:text-foreground transition-colors">
+                      Complete
+                    </button>
+                    <button className="text-primary hover:underline text-sm font-medium">
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {tasks.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
+                    No tasks found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

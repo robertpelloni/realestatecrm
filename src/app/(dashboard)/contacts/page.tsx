@@ -37,8 +37,22 @@ async function addContact(formData: FormData) {
   }
 }
 
-export default async function ContactsPage() {
+export default async function ContactsPage(props: { searchParams?: Promise<{ q?: string }> }) {
+  const searchParams = await props.searchParams;
+  const query = searchParams?.q || '';
+
+  const whereClause: any = {};
+  if (query) {
+    whereClause.OR = [
+      { firstName: { contains: query } },
+      { lastName: { contains: query } },
+      { email: { contains: query } },
+      { phone: { contains: query } },
+    ];
+  }
+
   const contacts = await prisma.contact.findMany({
+    where: whereClause,
     orderBy: {
       createdAt: 'desc',
     },
@@ -62,13 +76,21 @@ export default async function ContactsPage() {
       </div>
 
       <div className="bg-background border border-border rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex gap-4 items-center bg-muted/20">
+        <form className="p-4 border-b border-border flex gap-4 items-center bg-muted/20">
           <input
             type="text"
+            name="q"
+            defaultValue={query}
             placeholder="Search contacts..."
             className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
-        </div>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-secondary text-secondary-foreground text-sm font-medium rounded-md hover:bg-secondary/90 transition-colors"
+          >
+            Search
+          </button>
+        </form>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">

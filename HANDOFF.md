@@ -4,13 +4,14 @@
 
 **Current Session:**
 
-- Finalized deep analysis and Zod validation integration across all Server Actions (`Lead`, `Deal`, `Contact`, `Task`).
-- Restored the `Task` model in the Prisma schema which was accidentally dropped during a git rebase edge-case. Database is in sync and builds successfully.
-- Implemented `react-hot-toast` for robust, themed UI feedback. All data mutation forms now fire a success toast instead of failing silently or just reloading the page.
-- Updated `VERSION.md` (0.18.0) and `CHANGELOG.md` to reflect these polish updates.
+- Fetched and merged `origin/main` recursively resolving conflicts. The upstream branch had introduced new workflow routes (`/workflows/offer-draft` and `/workflows/listing-entry`), which are now safely preserved in the master branch alongside our core CRM feature sets.
+- Implemented deep URL query parameter-based filtering (Search by name/email, filter by status) on the Leads, Contacts, and Tasks list pages, fulfilling the pending `ROADMAP` tasks.
+- Scaffolded the `Activity` model in the Prisma schema to lay the groundwork for Phase 2's activity timelines, which will track CRM notes, status changes, emails, and calls.
+- Resolved build and TypeScript issues related to the newly synced files.
+- Bumped version to `0.19.0`.
 
 **Next Steps for Next Model/Agent:**
 
-1. **Data Table Utilities:** Begin implementing filtering, sorting, and pagination across all data tables (`Leads`, `Deals`, `Contacts`, `Tasks`). This requires careful handling of URL `useSearchParams` within Next.js `<Suspense>` boundaries.
-2. **Activity Timelines:** A critical CRM feature. Begin architecting the `Activity` model in Prisma to track when a Lead changes status, or a Deal stage moves.
-3. **Form Loading States:** Consider adding `useFormStatus` to the modal submit buttons to show a loading spinner while the Server Action resolves.
+1. **Activity Timeline UI:** The `Activity` model is live in the database. The next logical step is to build the frontend component (e.g., `ActivityTimeline.tsx`) and embed it on the individual Lead/Deal detail pages (`[id]/page.tsx`).
+2. **Workflow Shell Wiring:** The upstream branch introduced static workflow shells. These need to be wired up to actual data mutations (e.g., saving a draft offer to the database) and validated with Zod.
+3. **Pagination:** The list tables currently pull all records matching the filters. Implement a `take`/`skip` Prisma pagination approach for better performance as data grows.

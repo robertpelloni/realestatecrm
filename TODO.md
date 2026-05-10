@@ -20,11 +20,11 @@
 - [x] **Data Validation:** Implement Zod schema validation for all Server Actions (Leads, Contacts, Deals, Tasks).
 - [x] **Dashboard Metrics:** Replace hardcoded/mocked statistics on the main dashboard with dynamic Prisma queries.
 - [x] **UI Polish:** Add comprehensive UI loading states and Toast notifications for form submissions.
-- [ ] **Feature Expansion:** Add filtering, sorting, and pagination across all data tables (Leads, Contacts, Tasks).
-- [ ] **Feature Expansion:** Activity timelines for entities (record when status changes).
+- [x] **Feature Expansion:** Add filtering, sorting, and pagination across all data tables (Leads, Contacts, Tasks) using `useSearchParams`.
+- [x] **Feature Expansion:** Activity timelines for entities (record when status changes). Scaffold the `Activity` Prisma model.
+- [ ] **Feature Expansion:** Task deadlines and assignment (`dueDate`, `assignedToId`).
 
 ## Known Bugs / Tech Debt
 
-- Form submissions silently fail or reload without explicit user feedback (need Toast notifications).
 - Port conflict handling for tests needs a robust setup (`playwright` config).
 - Prisma SQLite dev.db causes occasional locking if dev server and tests hit it concurrently.
