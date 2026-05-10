@@ -1,26 +1,26 @@
-import { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import prisma from "./prisma"
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import prisma from './prisma';
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "jsmith@example.com" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'email', placeholder: 'jsmith@example.com' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials, _req) {
         if (!credentials?.email) {
-          return null
+          return null;
         }
 
         // Find user in database
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email
-          }
-        })
+            email: credentials.email,
+          },
+        });
 
         // For MVP, if the user exists we let them in (password check omitted for now as it's a mock)
         if (user) {
@@ -28,17 +28,17 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             name: user.name,
             email: user.email,
-          }
+          };
         }
 
-        return null
-      }
-    })
+        return null;
+      },
+    }),
   ],
   session: {
-    strategy: "jwt"
+    strategy: 'jwt',
   },
   pages: {
     signIn: '/auth/signin',
-  }
-}
+  },
+};

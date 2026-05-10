@@ -1,10 +1,10 @@
-import { withAuth } from "next-auth/middleware"
+import { withAuth } from 'next-auth/middleware';
 
 export default withAuth({
   pages: {
     signIn: '/auth/signin',
   },
-})
+});
 
 export const config = {
   matcher: [
@@ -17,6 +17,6 @@ export const config = {
      * - auth/signin (sign in page)
      * - root (/) (landing page)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|auth/signin|$).*)",
+    '/((?!api|_next/static|_next/image|favicon.ico|auth/signin|$).*)',
   ],
-}
+};

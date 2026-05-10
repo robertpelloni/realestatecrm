@@ -1,9 +1,9 @@
-import prisma from "@/lib/prisma"
-import AddContactModal from "@/components/AddContactModal"
-import { contactSchema } from "@/lib/validations/contact"
+import prisma from '@/lib/prisma';
+import AddContactModal from '@/components/AddContactModal';
+import { contactSchema } from '@/lib/validations/contact';
 
 async function addContact(formData: FormData) {
-  'use server'
+  'use server';
 
   const rawData = {
     firstName: formData.get('firstName'),
@@ -11,15 +11,15 @@ async function addContact(formData: FormData) {
     email: formData.get('email'),
     phone: formData.get('phone'),
     workspaceId: formData.get('workspaceId'),
-  }
+  };
 
-  const validatedData = contactSchema.safeParse(rawData)
+  const validatedData = contactSchema.safeParse(rawData);
 
   if (!validatedData.success) {
-    return { error: validatedData.error.issues[0].message }
+    return { error: validatedData.error.issues[0].message };
   }
 
-  const { firstName, lastName, email, phone, workspaceId } = validatedData.data
+  const { firstName, lastName, email, phone, workspaceId } = validatedData.data;
 
   try {
     await prisma.contact.create({
@@ -28,23 +28,23 @@ async function addContact(formData: FormData) {
         lastName: lastName || null,
         email: email || null,
         phone: phone || null,
-        workspaceId
-      }
-    })
+        workspaceId,
+      },
+    });
   } catch (error) {
-    console.error("Failed to add contact:", error)
-    return { error: "An unexpected error occurred while saving." }
+    console.error('Failed to add contact:', error);
+    return { error: 'An unexpected error occurred while saving.' };
   }
 }
 
 export default async function ContactsPage() {
   const contacts = await prisma.contact.findMany({
     orderBy: {
-      createdAt: 'desc'
-    }
-  })
+      createdAt: 'desc',
+    },
+  });
 
-  const workspaces = await prisma.workspace.findMany()
+  const workspaces = await prisma.workspace.findMany();
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -84,24 +84,32 @@ export default async function ContactsPage() {
             <tbody className="divide-y divide-border">
               {contacts.map((contact) => (
                 <tr key={contact.id} className="hover:bg-muted/10 transition-colors">
-                  <td className="px-6 py-4 font-medium">{contact.firstName} {contact.lastName}</td>
+                  <td className="px-6 py-4 font-medium">
+                    {contact.firstName} {contact.lastName}
+                  </td>
                   <td className="px-6 py-4 text-muted-foreground">{contact.email || '--'}</td>
                   <td className="px-6 py-4 text-muted-foreground">{contact.phone || '--'}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{new Date(contact.createdAt).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 text-muted-foreground">
+                    {new Date(contact.createdAt).toLocaleDateString()}
+                  </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-primary hover:underline text-sm font-medium">Edit</button>
+                    <button className="text-primary hover:underline text-sm font-medium">
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
               {contacts.length === 0 && (
-                 <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">No contacts found.</td>
-                 </tr>
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    No contacts found.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  )
+  );
 }
