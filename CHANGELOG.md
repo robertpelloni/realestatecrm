@@ -84,3 +84,9 @@
 
 - Added URL-based search (`q`) and `status` filtering to the Leads, Contacts, and Tasks list pages, fully satisfying strict Next.js 15 `useSearchParams` patterns.
 - Scaffolded the `Activity` data model in Prisma. This lays the groundwork for the core CRM activity timeline (logging when lead states change, notes, emails, calls).
+
+## [0.20.0] - Activity Timeline & Notes
+
+- Built the `AddActivityForm` component, allowing users to log notes on a Lead record.
+- Added `activitySchema` in Zod to validate activity additions.
+- Wired the `/leads/[id]` detail view to render the timeline dynamically using the newly scaffolded `Activity` model in Prisma.

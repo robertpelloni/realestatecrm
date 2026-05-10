@@ -1,13 +1,61 @@
 import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
+import AddActivityForm from '@/components/AddActivityForm';
+import { activitySchema } from '@/lib/validations/activity';
 
-export default async function LeadDetailPage({ params }: { params: { id: string } }) {
+async function addActivity(formData: FormData) {
+  'use server';
+
+  const rawData = {
+    content: formData.get('content'),
+    type: formData.get('type'),
+    workspaceId: formData.get('workspaceId'),
+    leadId: formData.get('leadId'),
+    dealId: formData.get('dealId'),
+    contactId: formData.get('contactId'),
+  };
+
+  const validatedData = activitySchema.safeParse(rawData);
+
+  if (!validatedData.success) {
+    return { error: validatedData.error.issues[0].message };
+  }
+
+  const data = validatedData.data;
+
+  try {
+    await prisma.activity.create({
+      data: {
+        content: data.content,
+        type: data.type,
+        workspaceId: data.workspaceId,
+        leadId: data.leadId || null,
+        dealId: data.dealId || null,
+        contactId: data.contactId || null,
+      },
+    });
+
+    if (data.leadId) {
+      revalidatePath(`/leads/${data.leadId}`);
+    }
+  } catch (error) {
+    console.error('Failed to add activity:', error);
+    return { error: 'An unexpected error occurred while saving.' };
+  }
+}
+
+export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
   const lead = await prisma.lead.findUnique({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
     include: {
       contact: true,
       workspace: true,
+      Activity: {
+        orderBy: { createdAt: 'desc' },
+      },
     },
   });
 
@@ -113,49 +161,38 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
           <div className="bg-background border border-border rounded-xl shadow-sm p-6 min-h-[400px]">
             <h2 className="text-lg font-bold mb-4">Activity Timeline</h2>
             <div className="space-y-6">
-              {/* Mock Timeline Items */}
-              <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <span className="text-sm">📧</span>
+              {lead.Activity.length === 0 ? (
+                <div className="text-sm text-muted-foreground text-center py-8">
+                  No activities recorded yet.
                 </div>
-                <div>
-                  <p className="text-sm font-medium">Initial Contact Email Sent</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Automated welcome sequence triggered via workflow.
-                  </p>
-                  <span className="text-xs text-muted-foreground mt-2 block">
-                    {new Date(lead.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-secondary/10 text-secondary-foreground flex items-center justify-center shrink-0">
-                  <span className="text-sm">👤</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Lead Created</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Lead imported into {lead.workspace.name}.
-                  </p>
-                  <span className="text-xs text-muted-foreground mt-2 block">
-                    {new Date(lead.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
+              ) : (
+                lead.Activity.map((activity) => (
+                  <div key={activity.id} className="flex gap-4">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <span className="text-sm">{activity.type === 'NOTE' ? '📝' : '⚡'}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {activity.type === 'NOTE' ? 'Note Added' : 'Activity Logged'}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
+                        {activity.content}
+                      </p>
+                      <span className="text-xs text-muted-foreground mt-2 block">
+                        {new Date(activity.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
-            <div className="mt-8 pt-4 border-t border-border">
-              <textarea
-                className="w-full bg-muted/30 border border-border rounded-md p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="Add a note or log an activity..."
-                rows={3}
-              ></textarea>
-              <div className="flex justify-end mt-2">
-                <button className="px-4 py-2 bg-accent text-accent-foreground font-medium text-sm rounded-md hover:bg-accent/90 transition-colors">
-                  Post Note
-                </button>
-              </div>
-            </div>
+            <AddActivityForm
+              addActivityAction={addActivity}
+              workspaceId={lead.workspaceId}
+              entityType="leadId"
+              entityId={lead.id}
+            />
           </div>
         </div>
       </div>
