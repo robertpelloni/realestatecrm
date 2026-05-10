@@ -1,48 +1,62 @@
-import prisma from '@/lib/prisma';
-import AddLeadModal from '@/components/AddLeadModal';
-import Link from 'next/link';
+import prisma from "@/lib/prisma"
+import AddLeadModal from "@/components/AddLeadModal"
+import Link from "next/link"
+import { leadSchema } from "@/lib/validations/lead"
 
 async function addLead(formData: FormData) {
-  'use server';
+  'use server'
 
-  const firstName = formData.get('firstName') as string;
-  const lastName = formData.get('lastName') as string;
-  const email = formData.get('email') as string;
-  const workspaceId = formData.get('workspaceId') as string;
+  const rawData = {
+    firstName: formData.get('firstName'),
+    lastName: formData.get('lastName'),
+    email: formData.get('email'),
+    workspaceId: formData.get('workspaceId'),
+  }
 
-  if (!firstName || !workspaceId) return;
+  const validatedData = leadSchema.safeParse(rawData)
 
-  const contact = await prisma.contact.create({
-    data: {
-      firstName,
-      lastName,
-      email,
-      workspaceId,
-    },
-  });
+  if (!validatedData.success) {
+    return { error: validatedData.error.issues[0].message }
+  }
 
-  await prisma.lead.create({
-    data: {
-      status: 'NEW',
-      score: 50,
-      source: 'Manual',
-      workspaceId,
-      contactId: contact.id,
-    },
-  });
+  const { firstName, lastName, email, workspaceId } = validatedData.data
+
+  try {
+    const contact = await prisma.contact.create({
+      data: {
+        firstName,
+        lastName: lastName || null,
+        email: email || null,
+        workspaceId
+      }
+    })
+
+    await prisma.lead.create({
+      data: {
+        status: 'NEW',
+        score: 50,
+        source: 'Manual',
+        workspaceId,
+        contactId: contact.id
+      }
+    })
+  } catch (error) {
+    console.error("Failed to add lead:", error)
+    return { error: "An unexpected error occurred while saving." }
+  }
 }
 
 export default async function LeadsPage() {
   const leads = await prisma.lead.findMany({
     include: {
-      contact: true,
+      contact: true
     },
     orderBy: {
-      createdAt: 'desc',
-    },
-  });
+      createdAt: 'desc'
+    }
+  })
 
-  const workspaces = await prisma.workspace.findMany();
+  const workspaces = await prisma.workspace.findMany()
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -89,9 +103,7 @@ export default async function LeadsPage() {
             <tbody className="divide-y divide-border">
               {leads.map((lead) => (
                 <tr key={lead.id} className="hover:bg-muted/10 transition-colors">
-                  <td className="px-6 py-4 font-medium">
-                    {lead.contact.firstName} {lead.contact.lastName}
-                  </td>
+                  <td className="px-6 py-4 font-medium">{lead.contact.firstName} {lead.contact.lastName}</td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <span>{lead.contact.email}</span>
@@ -99,72 +111,45 @@ export default async function LeadsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full font-medium border ${
-                        lead.status === 'NEW'
-                          ? 'bg-secondary/20 text-secondary-foreground border-secondary/30'
-                          : lead.status === 'QUALIFIED'
-                            ? 'bg-primary/20 text-primary border-primary/30'
-                            : 'bg-muted text-muted-foreground border-border'
-                      }`}
-                    >
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium border ${
+                      lead.status === 'NEW' ? 'bg-secondary/20 text-secondary-foreground border-secondary/30' :
+                      lead.status === 'QUALIFIED' ? 'bg-primary/20 text-primary border-primary/30' :
+                      'bg-muted text-muted-foreground border-border'
+                    }`}>
                       {lead.status}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div className="w-full bg-muted rounded-full h-2 max-w-[60px]">
-                        <div
-                          className={`h-2 rounded-full ${lead.score && lead.score > 80 ? 'bg-primary' : 'bg-primary/50'}`}
-                          style={{ width: `${lead.score || 0}%` }}
-                        ></div>
+                        <div className={`h-2 rounded-full ${lead.score && lead.score > 80 ? 'bg-primary' : 'bg-primary/50'}`} style={{ width: `${lead.score || 0}%` }}></div>
                       </div>
-                      <span
-                        className={`text-xs font-bold ${lead.score && lead.score > 80 ? 'text-primary' : 'text-muted-foreground'}`}
-                      >
-                        {lead.score}
-                      </span>
+                      <span className={`text-xs font-bold ${lead.score && lead.score > 80 ? 'text-primary' : 'text-muted-foreground'}`}>{lead.score}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-muted-foreground">{lead.source}</td>
                   <td className="px-6 py-4 text-right">
-                    <Link
-                      href={`/leads/${lead.id}`}
-                      className="text-primary hover:underline text-sm font-medium"
-                    >
-                      View
-                    </Link>
+                    <Link href={`/leads/${lead.id}`} className="text-primary hover:underline text-sm font-medium">View</Link>
                   </td>
                 </tr>
               ))}
               {leads.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
-                    No leads found.
-                  </td>
-                </tr>
+                 <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">No leads found.</td>
+                 </tr>
               )}
             </tbody>
           </table>
         </div>
 
         <div className="p-4 border-t border-border flex items-center justify-between text-sm text-muted-foreground bg-muted/10">
-          <span>
-            Showing 1 to {leads.length} of {leads.length} entries
-          </span>
+          <span>Showing 1 to {leads.length} of {leads.length} entries</span>
           <div className="flex gap-2">
-            <button
-              className="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-50"
-              disabled
-            >
-              Prev
-            </button>
-            <button className="px-3 py-1 border border-border rounded hover:bg-muted" disabled>
-              Next
-            </button>
+            <button className="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-50" disabled>Prev</button>
+            <button className="px-3 py-1 border border-border rounded hover:bg-muted" disabled>Next</button>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

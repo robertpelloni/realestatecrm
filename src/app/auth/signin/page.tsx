@@ -1,41 +1,41 @@
-'use client';
+'use client'
 
-import { signIn } from 'next-auth/react';
-import { Suspense } from 'react';
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from "next-auth/react"
+import { Suspense } from "react"
+import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 function SignInContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get("callbackUrl") || "/"
 
-  const [email, setEmail] = useState('jsmith@example.com');
-  const [password, setPassword] = useState('password123');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("jsmith@example.com")
+  const [password, setPassword] = useState("password123")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+    e.preventDefault()
+    setLoading(true)
+    setError("")
 
-    const res = await signIn('credentials', {
+    const res = await signIn("credentials", {
       redirect: false,
       email,
       password,
       callbackUrl,
-    });
+    })
 
-    setLoading(false);
+    setLoading(false)
 
     if (res?.error) {
-      setError('Invalid credentials');
+      setError("Invalid credentials")
     } else if (res?.ok) {
-      router.push(callbackUrl);
-      router.refresh();
+      router.push(callbackUrl)
+      router.refresh()
     }
-  };
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -61,9 +61,7 @@ function SignInContent() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
+              <label htmlFor="email-address" className="sr-only">Email address</label>
               <input
                 id="email-address"
                 name="email"
@@ -77,9 +75,7 @@ function SignInContent() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+              <label htmlFor="password" className="sr-only">Password</label>
               <input
                 id="password"
                 name="password"
@@ -96,12 +92,7 @@ function SignInContent() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-              />
+              <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 rounded border-border text-primary focus:ring-primary" />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
                 Remember me
               </label>
@@ -120,13 +111,13 @@ function SignInContent() {
               disabled={loading}
               className="group relative flex w-full justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }
 
 export default function SignIn() {
@@ -134,5 +125,5 @@ export default function SignIn() {
     <Suspense fallback={<div>Loading...</div>}>
       <SignInContent />
     </Suspense>
-  );
+  )
 }

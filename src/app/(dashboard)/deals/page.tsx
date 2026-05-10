@@ -1,64 +1,70 @@
-import prisma from '@/lib/prisma';
-import AddDealModal from '@/components/AddDealModal';
-import Link from 'next/link';
+import prisma from "@/lib/prisma"
+import AddDealModal from "@/components/AddDealModal"
+import Link from "next/link"
+import { dealSchema } from "@/lib/validations/deal"
 
 async function addDeal(formData: FormData) {
-  'use server';
+  'use server'
 
-  const title = formData.get('title') as string;
-  const value = formData.get('value') as string;
-  const stage = formData.get('stage') as string;
-  const contactId = formData.get('contactId') as string;
-  const workspaceId = formData.get('workspaceId') as string;
+  const rawData = {
+    title: formData.get('title'),
+    value: formData.get('value'),
+    stage: formData.get('stage'),
+    workspaceId: formData.get('workspaceId'),
+    contactId: formData.get('contactId'),
+  }
 
-  if (!title || !contactId || !workspaceId) return;
+  const validatedData = dealSchema.safeParse(rawData)
 
-  await prisma.deal.create({
-    data: {
-      title,
-      value: value ? parseFloat(value) : 0,
-      stage: stage || 'LEAD',
-      workspaceId,
-      contactId,
-    },
-  });
+  if (!validatedData.success) {
+    return { error: validatedData.error.issues[0].message }
+  }
+
+  const { title, value, stage, workspaceId, contactId } = validatedData.data
+
+  try {
+    await prisma.deal.create({
+      data: {
+        title,
+        value: value ? Number(value) : null,
+        stage,
+        workspaceId,
+        contactId
+      }
+    })
+  } catch (error) {
+    console.error("Failed to add deal:", error)
+    return { error: "An unexpected error occurred while saving." }
+  }
 }
 
 export default async function DealsPage() {
   const deals = await prisma.deal.findMany({
     include: {
-      contact: true,
+      contact: true
     },
     orderBy: {
-      updatedAt: 'desc',
-    },
-  });
+      createdAt: 'desc'
+    }
+  })
 
-  const workspaces = await prisma.workspace.findMany();
-  const contacts = await prisma.contact.findMany();
+  const workspaces = await prisma.workspace.findMany()
+  const contacts = await prisma.contact.findMany({
+    orderBy: { firstName: 'asc' }
+  })
 
-  // Group deals by stage
-  const dealsByStage = deals.reduce(
-    (acc, deal) => {
-      if (!acc[deal.stage]) acc[deal.stage] = [];
-      acc[deal.stage].push(deal);
-      return acc;
-    },
-    {} as Record<string, typeof deals>,
-  );
-
-  const formatCurrency = (value: number | null) => {
-    if (!value) return '$0';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+  const stages = [
+    { id: 'PROSPECTING', label: 'Prospecting' },
+    { id: 'QUALIFICATION', label: 'Qualification' },
+    { id: 'PROPOSAL', label: 'Proposal/Showing' },
+    { id: 'NEGOTIATION', label: 'Negotiation' },
+    { id: 'UNDER_CONTRACT', label: 'Under Contract' },
+    { id: 'CLOSED_WON', label: 'Closed Won' }
+  ]
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 h-[calc(100vh-6rem)] flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 flex-shrink-0">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Deals Pipeline</h1>
           <p className="text-muted-foreground">Track and manage your active transactions.</p>
@@ -68,133 +74,59 @@ export default async function DealsPage() {
         </div>
       </div>
 
-      {/* Kanban Board Container */}
-      <div className="flex-1 flex gap-6 overflow-x-auto pb-4 min-h-[500px]">
-        {/* Column: Lead */}
-        <div className="flex-shrink-0 w-80 flex flex-col bg-muted/20 rounded-xl border border-border">
-          <div className="p-4 border-b border-border flex justify-between items-center bg-background rounded-t-xl">
-            <h3 className="font-semibold text-sm uppercase tracking-wider">Lead</h3>
-            <span className="bg-muted text-muted-foreground text-xs py-0.5 px-2 rounded-full font-medium">
-              {dealsByStage['LEAD']?.length || 0}
-            </span>
-          </div>
-          <div className="p-3 space-y-3 flex-1 overflow-y-auto">
-            {dealsByStage['LEAD']?.map((deal) => (
-              <div
-                key={deal.id}
-                className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
-              >
-                <Link href={`/deals/${deal.id}`} className="hover:text-primary transition-colors">
-                  <h4 className="font-bold mb-1">{deal.title}</h4>
-                </Link>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {deal.contact.firstName} {deal.contact.lastName}
-                </p>
-                <div className="flex justify-between items-center text-sm font-medium">
-                  <span>{formatCurrency(deal.value)}</span>
-                  <div className="w-6 h-6 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-xs uppercase">
-                    {deal.contact.firstName[0]}
+      <div className="flex-1 overflow-x-auto pb-4">
+        <div className="flex gap-4 h-full min-w-max">
+          {stages.map((stage) => {
+            const stageDeals = deals.filter(d => d.stage === stage.id)
+            const stageTotal = stageDeals.reduce((sum, d) => sum + (d.value || 0), 0)
+
+            return (
+              <div key={stage.id} className="w-80 flex flex-col bg-muted/10 border border-border rounded-xl">
+                <div className="p-4 border-b border-border flex justify-between items-center bg-muted/20 rounded-t-xl">
+                  <h3 className="font-semibold">{stage.label}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium bg-background px-2 py-1 rounded-full border border-border">
+                      {stageDeals.length}
+                    </span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Column: Active */}
-        <div className="flex-shrink-0 w-80 flex flex-col bg-muted/20 rounded-xl border border-border">
-          <div className="p-4 border-b border-border flex justify-between items-center bg-background rounded-t-xl">
-            <h3 className="font-semibold text-sm uppercase tracking-wider">Active</h3>
-            <span className="bg-primary/20 text-primary text-xs py-0.5 px-2 rounded-full font-medium border border-primary/30">
-              {dealsByStage['ACTIVE']?.length || 0}
-            </span>
-          </div>
-          <div className="p-3 space-y-3 flex-1 overflow-y-auto">
-            {dealsByStage['ACTIVE']?.map((deal) => (
-              <div
-                key={deal.id}
-                className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
-              >
-                <Link href={`/deals/${deal.id}`} className="hover:text-primary transition-colors">
-                  <h4 className="font-bold mb-1">{deal.title}</h4>
-                </Link>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {deal.contact.firstName} {deal.contact.lastName}
-                </p>
-                <div className="flex justify-between items-center text-sm font-medium">
-                  <span>{formatCurrency(deal.value)}</span>
-                  <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs uppercase">
-                    {deal.contact.firstName[0]}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+                <div className="p-2 flex-1 overflow-y-auto space-y-2">
+                  {stageDeals.map(deal => (
+                    <div key={deal.id} className="bg-background border border-border p-3 rounded-lg shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group">
+                      <div className="flex justify-between items-start mb-2">
+                        <Link href={`/deals/${deal.id}`} className="font-medium text-sm group-hover:text-primary transition-colors">
+                          {deal.title}
+                        </Link>
+                      </div>
+                      <div className="text-xs text-muted-foreground mb-3">
+                        {deal.contact.firstName} {deal.contact.lastName}
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-semibold text-foreground">
+                          {deal.value ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(deal.value) : '--'}
+                        </span>
+                        <span className="text-muted-foreground">{new Date(deal.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
 
-        {/* Column: Under Contract */}
-        <div className="flex-shrink-0 w-80 flex flex-col bg-muted/20 rounded-xl border border-border">
-          <div className="p-4 border-b border-border flex justify-between items-center bg-background rounded-t-xl">
-            <h3 className="font-semibold text-sm uppercase tracking-wider">Under Contract</h3>
-            <span className="bg-secondary/20 text-secondary-foreground text-xs py-0.5 px-2 rounded-full font-medium border border-secondary/30">
-              {dealsByStage['UNDER_CONTRACT']?.length || 0}
-            </span>
-          </div>
-          <div className="p-3 space-y-3 flex-1 overflow-y-auto">
-            {dealsByStage['UNDER_CONTRACT']?.map((deal) => (
-              <div
-                key={deal.id}
-                className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-xs font-bold text-green-600">Pending</span>
+                  {stageDeals.length === 0 && (
+                    <div className="h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center text-xs text-muted-foreground">
+                      No deals
+                    </div>
+                  )}
                 </div>
-                <Link href={`/deals/${deal.id}`} className="hover:text-primary transition-colors">
-                  <h4 className="font-bold mb-1">{deal.title}</h4>
-                </Link>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {deal.contact.firstName} {deal.contact.lastName}
-                </p>
-                <div className="flex justify-between items-center text-sm font-medium">
-                  <span>{formatCurrency(deal.value)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Column: Closed */}
-        <div className="flex-shrink-0 w-80 flex flex-col bg-muted/20 rounded-xl border border-border opacity-70">
-          <div className="p-4 border-b border-border flex justify-between items-center bg-background rounded-t-xl">
-            <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
-              Closed
-            </h3>
-            <span className="bg-muted text-muted-foreground text-xs py-0.5 px-2 rounded-full font-medium">
-              {dealsByStage['CLOSED']?.length || 0}
-            </span>
-          </div>
-          <div className="p-3 space-y-3 flex-1 overflow-y-auto">
-            {dealsByStage['CLOSED']?.map((deal) => (
-              <div
-                key={deal.id}
-                className="bg-background p-4 rounded-lg border border-border shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
-              >
-                <Link href={`/deals/${deal.id}`} className="hover:text-primary transition-colors">
-                  <h4 className="font-bold mb-1">{deal.title}</h4>
-                </Link>
-                <div className="flex justify-between items-center text-sm font-medium">
-                  <span>{formatCurrency(deal.value)}</span>
+                <div className="p-3 border-t border-border text-xs text-muted-foreground flex justify-between bg-muted/5 rounded-b-xl">
+                  <span>Total Value:</span>
+                  <span className="font-medium">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(stageTotal)}</span>
                 </div>
               </div>
-            ))}
-            {(!dealsByStage['CLOSED'] || dealsByStage['CLOSED'].length === 0) && (
-              <div className="border-2 border-dashed border-border rounded-lg p-4 text-center text-muted-foreground text-sm flex flex-col items-center justify-center h-24">
-                Drag deals here to close
-              </div>
-            )}
-          </div>
+            )
+          })}
         </div>
       </div>
     </div>
-  );
+  )
 }

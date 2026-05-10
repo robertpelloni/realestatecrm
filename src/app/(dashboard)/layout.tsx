@@ -1,10 +1,13 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
-import SignOutButton from '@/components/SignOutButton';
-import Link from 'next/link';
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
+import SignOutButton from "@/components/SignOutButton"
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions);
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const session = await getServerSession(authOptions)
 
   return (
     <div className="flex h-screen bg-background">
@@ -19,42 +22,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
+          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-md bg-primary/10 text-primary font-medium">
             Dashboard
-          </Link>
-          <Link
-            href="/leads"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
+          </a>
+          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             Leads
-          </Link>
-          <Link
-            href="/contacts"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
+          </a>
+          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             Contacts
-          </Link>
-          <Link
-            href="/deals"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
+          </a>
+          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             Deals
-          </Link>
-          <Link
-            href="/tasks"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Tasks
-          </Link>
-          <Link
-            href="#"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
+          </a>
+          <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             Workflows
-          </Link>
+          </a>
         </nav>
         <div className="p-4 border-t border-border">
           <div className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted cursor-pointer transition-colors">
@@ -62,12 +44,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
               {session?.user?.name?.[0] || 'U'}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium truncate max-w-[150px]">
-                {session?.user?.name || 'User'}
-              </span>
-              <span className="text-xs text-muted-foreground truncate max-w-[150px]">
-                {session?.user?.email || 'user@example.com'}
-              </span>
+              <span className="text-sm font-medium truncate max-w-[150px]">{session?.user?.name || 'User'}</span>
+              <span className="text-xs text-muted-foreground truncate max-w-[150px]">{session?.user?.email || 'user@example.com'}</span>
               <SignOutButton />
             </div>
           </div>
@@ -89,8 +67,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </button>
           </div>
         </header>
-        <div className="flex-1 overflow-auto p-6">{children}</div>
+        <div className="flex-1 overflow-auto p-6">
+          {children}
+        </div>
       </main>
     </div>
-  );
+  )
 }

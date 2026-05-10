@@ -1,29 +1,17 @@
-# AGENTS.md (Universal LLM Instructions)
+# AGENTS.md
 
-Welcome, AI Agent. This repository utilizes a multi-model workflow (Jules, Claude, Gemini, GPT) to build a complex Real Estate CRM.
+## Universal LLM Instructions
 
-## Your Prime Directives
+This file contains the global instructions for all AI agents (Claude, Gemini, GPT, Copilot) working on this project.
 
-1. **Autonomous Execution:** Do not stop prematurely. Analyze, plan, execute, verify, and document continuously until a feature is 100% complete, fully wired to the UI, and bug-free.
-2. **Deep Research & Context:** Before writing code, use your Bash/Search tools to explore `docs/`, `MEMORY.md`, `VISION.md`, `ROADMAP.md`, `TODO.md`, and `IDEAS.md`. Understand the macro-architecture (Next.js 15 App Router, Prisma, NextAuth).
-3. **No Half-Measures:** If you build a backend feature (e.g., a Prisma model), you MUST build the corresponding frontend UI, hook up Server Actions, and ensure error handling/loading states are visible to the user.
-4. **Git Hygiene:**
-   - Commit frequently with descriptive messages.
-   - Intelligently merge feature branches. NEVER lose progress. Resolve conflicts carefully.
-   - Ensure the version number in `VERSION.md` is bumped upon feature completion, and update `CHANGELOG.md` accordingly.
-5. **Session Safety:** **NEVER execute `killall node`**. This will terminate the agent session. If you need to clear ports, use `lsof -i :<port>` and kill specific PIDs.
+### Protocol for Every Session
 
-## Code Standards
-
-- **Next.js 15 Strictness:** Use `<Link>` for navigation. Wrap client components using `useSearchParams` in `<Suspense>`.
-- **Data Mutations:** Use Server Actions colocated near components. Validate inputs (future: use Zod). Use `revalidatePath` to update UI optimistically.
-- **Styling:** Adhere strictly to the Luxury Black/Blue/Gold theme using Tailwind CSS.
-- **Commenting:** Write deep, thoughtful comments explaining _why_ complex decisions were made, side effects, and edge cases. Do not write shallow comments.
-
-## Handoff Protocol
-
-At the end of your session, you MUST:
-
-1. Re-analyze the project state.
-2. Update `HANDOFF.md`, `TODO.md`, `MEMORY.md`, and `IDEAS.md` with your findings, completed tasks, and next steps for the incoming agent.
-3. Commit and push your changes.
+1. **Memory & Context:** Read all documentation (`README.md`, `VISION.md`, `ROADMAP.md`, `AGENTS.md`) before starting.
+2. **Analysis:** Analyze the project in extreme depth to determine missing features, incomplete code, or refactoring opportunities.
+3. **Documentation:** Update `TODO.md`, `ROADMAP.md`, `CHANGELOG.md`, and `VERSION.md` (incrementing build/version). Always document your findings and session history in `HANDOFF.md`.
+4. **Implementation:** Proceed autonomously to implement features based on the roadmap. Ensure wide breadth of options, zero bugs, and full UI representation.
+5. **Coding Standards:**
+   - Use TypeScript.
+   - Comment code in depth (explain the why, side effects, optimizations, non-working methods). Do not comment self-explanatory code.
+   - Ensure all version references point to `VERSION.md` dynamically where possible.
+6. **Git Protocol:** Intelligently merge feature branches, pull upstream changes, commit, and push frequently. Use descriptive commit messages including the version bump.

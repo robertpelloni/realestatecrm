@@ -1,25 +1,24 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Seeding database...');
+  console.log('Seeding database...')
 
   // Clear existing to prevent duplicates on multiple seed runs
-  await prisma.workspaceMember.deleteMany();
-  await prisma.deal.deleteMany();
-  await prisma.lead.deleteMany();
-  await prisma.contact.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.task.deleteMany();
-  await prisma.workspace.deleteMany();
+  await prisma.workspaceMember.deleteMany()
+  await prisma.deal.deleteMany()
+  await prisma.lead.deleteMany()
+  await prisma.contact.deleteMany()
+  await prisma.user.deleteMany()
+  await prisma.workspace.deleteMany()
 
   // Create Workspace
   const workspace = await prisma.workspace.create({
     data: {
       name: 'Excel Legacy Realty Team',
     },
-  });
+  })
 
   // Create User
   const user = await prisma.user.create({
@@ -28,7 +27,7 @@ async function main() {
       email: 'jsmith@example.com',
       role: 'AGENT',
     },
-  });
+  })
 
   // Link User to Workspace
   await prisma.workspaceMember.create({
@@ -37,7 +36,7 @@ async function main() {
       workspaceId: workspace.id,
       role: 'AGENT',
     },
-  });
+  })
 
   // Create Contacts
   const contact1 = await prisma.contact.create({
@@ -48,7 +47,7 @@ async function main() {
       phone: '555-0192',
       workspaceId: workspace.id,
     },
-  });
+  })
 
   const contact2 = await prisma.contact.create({
     data: {
@@ -58,7 +57,7 @@ async function main() {
       phone: '555-8472',
       workspaceId: workspace.id,
     },
-  });
+  })
 
   const contact3 = await prisma.contact.create({
     data: {
@@ -68,7 +67,7 @@ async function main() {
       phone: '555-3321',
       workspaceId: workspace.id,
     },
-  });
+  })
 
   // Create Leads
   await prisma.lead.create({
@@ -79,7 +78,7 @@ async function main() {
       workspaceId: workspace.id,
       contactId: contact1.id,
     },
-  });
+  })
 
   await prisma.lead.create({
     data: {
@@ -89,7 +88,7 @@ async function main() {
       workspaceId: workspace.id,
       contactId: contact2.id,
     },
-  });
+  })
 
   await prisma.lead.create({
     data: {
@@ -99,7 +98,7 @@ async function main() {
       workspaceId: workspace.id,
       contactId: contact3.id,
     },
-  });
+  })
 
   // Create Deals
   await prisma.deal.create({
@@ -110,7 +109,7 @@ async function main() {
       workspaceId: workspace.id,
       contactId: contact1.id,
     },
-  });
+  })
 
   await prisma.deal.create({
     data: {
@@ -120,7 +119,7 @@ async function main() {
       workspaceId: workspace.id,
       contactId: contact2.id,
     },
-  });
+  })
 
   await prisma.deal.create({
     data: {
@@ -130,7 +129,7 @@ async function main() {
       workspaceId: workspace.id,
       contactId: contact3.id,
     },
-  });
+  })
 
   await prisma.deal.create({
     data: {
@@ -140,47 +139,16 @@ async function main() {
       workspaceId: workspace.id,
       contactId: contact1.id,
     },
-  });
+  })
 
-  // Create Tasks
-  await prisma.task.create({
-    data: {
-      title: 'Call new Zillow lead',
-      description: 'Follow up within 5 minutes of inquiry.',
-      dueDate: new Date(new Date().setHours(new Date().getHours() + 2)),
-      priority: 'HIGH',
-      workspaceId: workspace.id,
-      userId: user.id,
-    },
-  });
-
-  await prisma.task.create({
-    data: {
-      title: 'Review title docs',
-      priority: 'MEDIUM',
-      workspaceId: workspace.id,
-      userId: user.id,
-    },
-  });
-
-  await prisma.task.create({
-    data: {
-      title: 'Send weekly market update',
-      priority: 'LOW',
-      workspaceId: workspace.id,
-      userId: user.id,
-      completed: true,
-    },
-  });
-
-  console.log('Seeding complete.');
+  console.log('Seeding complete.')
 }
 
 main()
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
+    console.error(e)
+    process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect();
-  });
+    await prisma.$disconnect()
+  })
