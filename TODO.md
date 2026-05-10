@@ -19,3 +19,4 @@
 - [x] Create mock seed data script (`prisma/seed.ts`).
 - [x] Implement Add Lead and New Deal forms and server actions.
 - [x] Integrate NextAuth session context and protect dashboard routes.
+- [x] Connect NextAuth to Prisma and implement Sign In / Sign Out UI flows.

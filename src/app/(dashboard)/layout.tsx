@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
+import SignOutButton from "@/components/SignOutButton"
 
 export default async function DashboardLayout({
   children,
@@ -45,6 +46,7 @@ export default async function DashboardLayout({
             <div className="flex flex-col">
               <span className="text-sm font-medium truncate max-w-[150px]">{session?.user?.name || 'User'}</span>
               <span className="text-xs text-muted-foreground truncate max-w-[150px]">{session?.user?.email || 'user@example.com'}</span>
+              <SignOutButton />
             </div>
           </div>
         </div>

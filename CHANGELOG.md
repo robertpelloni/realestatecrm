@@ -51,3 +51,8 @@
 - Added `SessionProvider` wrapper to `layout.tsx`.
 - Implemented `middleware.ts` to protect dashboard routes with NextAuth.
 - Updated `(dashboard)/layout.tsx` to display logged-in user data from NextAuth session.
+
+## [0.13.0] - Database Authentication Flow
+- Wired NextAuth credentials provider to validate against the Prisma database.
+- Updated the sign-in page to execute NextAuth client-side sign-in.
+- Added a dynamic Sign Out button to the dashboard sidebar.
