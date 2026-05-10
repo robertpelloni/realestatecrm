@@ -1,28 +1,30 @@
-import prisma from "@/lib/prisma"
+import prisma from '@/lib/prisma';
 
 export default async function DashboardHome() {
-  const leadsCount = await prisma.lead.count()
+  const leadsCount = await prisma.lead.count();
   const activeDealsCount = await prisma.deal.count({
-    where: { stage: 'ACTIVE' }
-  })
+    where: { stage: 'ACTIVE' },
+  });
   const pipelineValueAgg = await prisma.deal.aggregate({
     _sum: { value: true },
-    where: { stage: { notIn: ['CLOSED', 'LOST'] } }
-  })
+    where: { stage: { notIn: ['CLOSED', 'LOST'] } },
+  });
 
-  const pipelineValue = pipelineValueAgg._sum.value || 0
+  const pipelineValue = pipelineValueAgg._sum.value || 0;
   const formattedPipelineValue = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     notation: 'compact',
-    maximumFractionDigits: 1
-  }).format(pipelineValue)
+    maximumFractionDigits: 1,
+  }).format(pipelineValue);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back. Here&apos;s what&apos;s happening with your deals today.</p>
+        <p className="text-muted-foreground">
+          Welcome back. Here&apos;s what&apos;s happening with your deals today.
+        </p>
       </div>
 
       {/* Stats row */}
@@ -65,21 +67,30 @@ export default async function DashboardHome() {
             <div className="flex items-start gap-4 pb-4 border-b border-border">
               <div className="w-2 h-2 mt-2 rounded-full bg-primary flex-shrink-0"></div>
               <div>
-                <p className="text-sm"><span className="font-medium">AI Assistant</span> qualified lead <span className="font-medium">Sarah Jenkins</span>.</p>
+                <p className="text-sm">
+                  <span className="font-medium">AI Assistant</span> qualified lead{' '}
+                  <span className="font-medium">Sarah Jenkins</span>.
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">10 minutes ago</p>
               </div>
             </div>
             <div className="flex items-start gap-4 pb-4 border-b border-border">
               <div className="w-2 h-2 mt-2 rounded-full bg-secondary flex-shrink-0"></div>
               <div>
-                <p className="text-sm">Offer submitted for <span className="font-medium">123 Main St</span> via MLS workflow.</p>
+                <p className="text-sm">
+                  Offer submitted for <span className="font-medium">123 Main St</span> via MLS
+                  workflow.
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">2 hours ago</p>
               </div>
             </div>
             <div className="flex items-start gap-4 pb-4 border-b border-border">
               <div className="w-2 h-2 mt-2 rounded-full bg-muted-foreground flex-shrink-0"></div>
               <div>
-                <p className="text-sm"><span className="font-medium">Voice Note</span> logged to deal <span className="font-medium">Smith Buy</span>.</p>
+                <p className="text-sm">
+                  <span className="font-medium">Voice Note</span> logged to deal{' '}
+                  <span className="font-medium">Smith Buy</span>.
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">Yesterday at 4:30 PM</p>
               </div>
             </div>
@@ -113,5 +124,5 @@ export default async function DashboardHome() {
         </div>
       </div>
     </div>
-  )
+  );
 }

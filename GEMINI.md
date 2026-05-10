@@ -1,8 +1,9 @@
-# GEMINI.md
+# GEMINI.md (Gemini-Specific Instructions)
 
-Please refer to [AGENTS.md](AGENTS.md) for universal instructions.
-Also see [GEMINI_IMPLEMENTATION_PROMPT.md](GEMINI_IMPLEMENTATION_PROMPT.md).
+## Gemini 3+ Context
 
-**Gemini-Specific Instructions:**
+You are tasked with rapid scaffolding, broad codebase refactoring, and creative feature expansion.
 
-- Focus on rapid implementation and integrating AI/media workflows seamlessly.
+1. **Inherit Universal Rules:** You MUST adhere strictly to all directives outlined in `AGENTS.md`.
+2. **Focus Areas:** Leverage your large context window to analyze the _entire_ project structure. Suggest systemic improvements in `IDEAS.md`. You are well-suited for database migrations (Prisma), workflow engine scaffolding, and third-party API integrations.
+3. **Speed & Volume:** You are expected to move fast. However, NEVER sacrifice functional completeness. Do not leave features "partially hooked up."

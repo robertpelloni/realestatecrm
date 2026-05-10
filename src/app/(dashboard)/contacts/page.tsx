@@ -1,16 +1,16 @@
-import prisma from "@/lib/prisma"
-import AddContactModal from "@/components/AddContactModal"
+import prisma from '@/lib/prisma';
+import AddContactModal from '@/components/AddContactModal';
 
 async function addContact(formData: FormData) {
-  'use server'
+  'use server';
 
-  const firstName = formData.get('firstName') as string
-  const lastName = formData.get('lastName') as string
-  const email = formData.get('email') as string
-  const phone = formData.get('phone') as string
-  const workspaceId = formData.get('workspaceId') as string
+  const firstName = formData.get('firstName') as string;
+  const lastName = formData.get('lastName') as string;
+  const email = formData.get('email') as string;
+  const phone = formData.get('phone') as string;
+  const workspaceId = formData.get('workspaceId') as string;
 
-  if (!firstName || !workspaceId) return
+  if (!firstName || !workspaceId) return;
 
   await prisma.contact.create({
     data: {
@@ -18,19 +18,19 @@ async function addContact(formData: FormData) {
       lastName,
       email,
       phone,
-      workspaceId
-    }
-  })
+      workspaceId,
+    },
+  });
 }
 
 export default async function ContactsPage() {
   const contacts = await prisma.contact.findMany({
     orderBy: {
-      lastName: 'asc'
-    }
-  })
+      lastName: 'asc',
+    },
+  });
 
-  const workspaces = await prisma.workspace.findMany()
+  const workspaces = await prisma.workspace.findMany();
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -75,7 +75,9 @@ export default async function ContactsPage() {
                       <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold uppercase text-xs">
                         {contact.firstName[0]}
                       </div>
-                      <span>{contact.firstName} {contact.lastName}</span>
+                      <span>
+                        {contact.firstName} {contact.lastName}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">{contact.email || '-'}</td>
@@ -84,27 +86,40 @@ export default async function ContactsPage() {
                     {new Date(contact.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-primary hover:underline text-sm font-medium">View</button>
+                    <button className="text-primary hover:underline text-sm font-medium">
+                      View
+                    </button>
                   </td>
                 </tr>
               ))}
               {contacts.length === 0 && (
-                 <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">No contacts found.</td>
-                 </tr>
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    No contacts found.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
         </div>
 
         <div className="p-4 border-t border-border flex items-center justify-between text-sm text-muted-foreground bg-muted/10">
-          <span>Showing 1 to {contacts.length} of {contacts.length} entries</span>
+          <span>
+            Showing 1 to {contacts.length} of {contacts.length} entries
+          </span>
           <div className="flex gap-2">
-            <button className="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-50" disabled>Prev</button>
-            <button className="px-3 py-1 border border-border rounded hover:bg-muted" disabled>Next</button>
+            <button
+              className="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-50"
+              disabled
+            >
+              Prev
+            </button>
+            <button className="px-3 py-1 border border-border rounded hover:bg-muted" disabled>
+              Next
+            </button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

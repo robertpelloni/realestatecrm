@@ -20,34 +20,34 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  workspaces    WorkspaceMember[]
-  leads         Lead[]
-  contacts      Contact[]
-  deals         Deal[]
+  workspaces WorkspaceMember[]
+  leads      Lead[]
+  contacts   Contact[]
+  deals      Deal[]
+  tasks      Task[]
 }
 
-
-
 model Workspace {
-  id          String   @id @default(cuid())
-  name        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  members     WorkspaceMember[]
-  leads       Lead[]
-  contacts    Contact[]
-  deals       Deal[]
+  members  WorkspaceMember[]
+  leads    Lead[]
+  contacts Contact[]
+  deals    Deal[]
+  tasks    Task[]
 }
 
 model WorkspaceMember {
-  id          String   @id @default(cuid())
+  id          String @id @default(cuid())
   userId      String
   workspaceId String
-  role        String   @default("AGENT")
+  role        String @default("AGENT")
 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([userId, workspaceId])
 }
@@ -63,16 +63,16 @@ model Contact {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  user        User?     @relation(fields: [userId], references: [id])
-  leads       Lead[]
-  deals       Deal[]
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+  leads     Lead[]
+  deals     Deal[]
 }
 
 model Lead {
   id          String   @id @default(cuid())
   source      String?
-  status      String @default("NEW")
+  status      String   @default("NEW")
   score       Int?     @default(0)
   workspaceId String
   contactId   String
@@ -80,25 +80,45 @@ model Lead {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  user        User?     @relation(fields: [userId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+  tasks     Task[]
 }
-
-
 
 model Deal {
   id          String   @id @default(cuid())
   title       String
   value       Float?
-  stage       String @default("LEAD")
+  stage       String   @default("LEAD")
   workspaceId String
   contactId   String
   userId      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  user        User?     @relation(fields: [userId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+  tasks     Task[]
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean   @default(false)
+  priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH
+  workspaceId String
+  userId      String?
+  leadId      String?
+  dealId      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+  lead      Lead?     @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
 }
