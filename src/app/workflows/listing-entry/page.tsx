@@ -20,7 +20,8 @@ export default function ListingEntryPage() {
       eyebrow="Listing workflow map"
       title="Listing Entry Screen"
       routeLabel="/workflows/listing-entry"
-      subtitle="Interactive listing entry with editable property data, mock CRM records, local draft persistence, validation, and mobile-first controls."
+      subtitle="Interactive listing entry with editable property data, backend draft persistence, mock CRM records, validation, and mobile-first controls."
+      workflowId="listing-entry"
       storageKey="workflow-listing-entry"
       summaryItems={[
         { label: 'Seller', value: 'Taylor Johnson', source: 'CRM' },

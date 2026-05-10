@@ -304,3 +304,10 @@ Purpose: let the agent enter and publish a listing with less manual re-entry whi
 - validation checks before MLS submission
 - mobile-safe sticky action bar, media actions, and offline-friendly draft recovery
 
+## Backend-backed workflow state
+
+- workflow shells now load and save through a backend route handler
+- current draft state is stored under `/api/workflows/[workflowId]`
+- backend persistence is mirrored into local storage for resilience
+- the workflow store is file-backed in development and can later be swapped for a database
+

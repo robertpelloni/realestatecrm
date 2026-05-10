@@ -10,6 +10,7 @@
 - Updated planning docs to include wireframe component maps and workflow shell implementation.
 - Added an interactive `WorkflowStudio` component with editable form state, local draft save, validation, activity history, and mock CRM rails.
 - Converted the offer and listing screens into interactive client-side workflow pages.
+- Added a file-backed backend workflow state store with `/api/workflows/[workflowId]` hydration and persistence.
 
 **Next Steps for Next Model:**
 - Wire the workflow shells to live CRM data and persistence.

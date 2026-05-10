@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import {
+  createEmptyWorkflowSnapshot,
+  type WorkflowActivityEntry,
+  type WorkflowSnapshot,
+} from '@/lib/workflow-state';
 
 type Tone = 'primary' | 'secondary' | 'ghost';
 
@@ -47,17 +53,12 @@ type SummaryItem = {
   accent?: boolean;
 };
 
-type ActivityEntry = {
-  title: string;
-  detail: string;
-  timestamp: string;
-};
-
 type WorkflowStudioProps = {
   eyebrow: string;
   title: string;
   subtitle: string;
   routeLabel: string;
+  workflowId: string;
   storageKey: string;
   summaryItems: SummaryItem[];
   sections: WorkflowSection[];
@@ -68,7 +69,7 @@ type WorkflowStudioProps = {
   provenanceTitle: string;
   provenanceNotes: string[];
   defaultValues: Record<string, string>;
-  activitySeed: ActivityEntry[];
+  activitySeed: WorkflowActivityEntry[];
 };
 
 const toneStyles: Record<Tone, string> = {
@@ -76,6 +77,8 @@ const toneStyles: Record<Tone, string> = {
   secondary: 'bg-secondary text-secondary-foreground hover:opacity-90',
   ghost: 'border border-border bg-background text-foreground hover:bg-muted',
 };
+
+const emptySnapshot = createEmptyWorkflowSnapshot();
 
 function formatTimestamp(value: string | null) {
   if (!value) return 'Not saved yet';
@@ -88,6 +91,10 @@ function formatTimestamp(value: string | null) {
   }).format(new Date(value));
 }
 
+function actionLabel(action: WorkflowAction) {
+  return action.label;
+}
+
 function ActionButton({ action, onClick }: { action: WorkflowAction; onClick: () => void }) {
   return (
     <button
@@ -95,7 +102,7 @@ function ActionButton({ action, onClick }: { action: WorkflowAction; onClick: ()
       onClick={onClick}
       className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${toneStyles[action.tone]}`}
     >
-      {action.label}
+      {actionLabel(action)}
     </button>
   );
 }
@@ -108,7 +115,9 @@ function SummaryCard({ item }: { item: SummaryItem }) {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             {item.label}
           </p>
-          <p className={`mt-2 text-sm font-semibold ${item.accent ? 'text-secondary' : 'text-foreground'}`}>
+          <p
+            className={`mt-2 text-sm font-semibold ${item.accent ? 'text-secondary' : 'text-foreground'}`}
+          >
             {item.value}
           </p>
         </div>
@@ -161,11 +170,7 @@ function FieldEditor({
           onChange={(event) => onChange(event.target.value)}
         />
       ) : field.type === 'select' ? (
-        <select
-          className={baseClass}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-        >
+        <select className={baseClass} value={value} onChange={(event) => onChange(event.target.value)}>
           <option value="">Select one</option>
           {field.options?.map((option) => (
             <option key={option} value={option}>
@@ -187,7 +192,7 @@ function FieldEditor({
   );
 }
 
-function ActivityFeed({ activity }: { activity: ActivityEntry[] }) {
+function ActivityFeed({ activity }: { activity: WorkflowActivityEntry[] }) {
   return (
     <div className="space-y-3">
       {activity.map((entry) => (
@@ -207,11 +212,28 @@ function ActivityFeed({ activity }: { activity: ActivityEntry[] }) {
   );
 }
 
+function parseStoredState(raw: string | null): WorkflowSnapshot | null {
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<WorkflowSnapshot>;
+    return {
+      draft: parsed.draft ?? {},
+      activity: parsed.activity ?? [],
+      lastSavedAt: parsed.lastSavedAt ?? null,
+      banner: parsed.banner ?? emptySnapshot.banner,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function WorkflowStudio({
   eyebrow,
   title,
   subtitle,
   routeLabel,
+  workflowId,
   storageKey,
   summaryItems,
   sections,
@@ -225,38 +247,81 @@ export function WorkflowStudio({
   activitySeed,
 }: WorkflowStudioProps) {
   const [draft, setDraft] = useState<Record<string, string>>(defaultValues);
-  const [activity, setActivity] = useState<ActivityEntry[]>(activitySeed);
+  const [activity, setActivity] = useState<WorkflowActivityEntry[]>(activitySeed);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
-  const [banner, setBanner] = useState('Draft ready for editing.');
+  const [banner, setBanner] = useState(emptySnapshot.banner);
+  const [connectionState, setConnectionState] = useState<'loading' | 'backend' | 'local' | 'empty'>('loading');
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'fallback'>('idle');
   const [hydrated, setHydrated] = useState(false);
 
+  const autosaveRef = useRef<number | null>(null);
+  const saveSequenceRef = useRef(0);
+
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    let isActive = true;
 
-    const raw = window.localStorage.getItem(storageKey);
-    if (raw) {
+    const loadState = async () => {
       try {
-        const parsed = JSON.parse(raw) as {
-          draft?: Record<string, string>;
-          activity?: ActivityEntry[];
-          lastSavedAt?: string | null;
-          banner?: string;
-        };
+        const response = await fetch(`/api/workflows/${workflowId}`, { cache: 'no-store' });
+        if (!isActive) return;
 
-        /* eslint-disable react-hooks/set-state-in-effect */
-        if (parsed.draft) setDraft({ ...defaultValues, ...parsed.draft });
-        if (parsed.activity?.length) setActivity(parsed.activity);
-        if (parsed.lastSavedAt) setLastSavedAt(parsed.lastSavedAt);
-        if (parsed.banner) setBanner(parsed.banner);
-        /* eslint-enable react-hooks/set-state-in-effect */
+        if (response.ok) {
+          const data = (await response.json()) as {
+            found?: boolean;
+            snapshot?: Partial<WorkflowSnapshot>;
+            updatedAt?: string;
+          };
+
+          if (data.found && data.snapshot) {
+            const snapshot: WorkflowSnapshot = {
+              draft: data.snapshot.draft ?? {},
+              activity: data.snapshot.activity ?? activitySeed,
+              lastSavedAt: data.snapshot.lastSavedAt ?? data.updatedAt ?? null,
+              banner: data.snapshot.banner ?? emptySnapshot.banner,
+            };
+
+            setDraft({ ...defaultValues, ...snapshot.draft });
+            setActivity(snapshot.activity.length ? snapshot.activity : activitySeed);
+            setLastSavedAt(snapshot.lastSavedAt);
+            setBanner(snapshot.banner);
+            setConnectionState('backend');
+            setSaveState('saved');
+            setHydrated(true);
+            return;
+          }
+        }
       } catch {
-        // If the local draft is corrupt, fall back to the default mock CRM state.
+        // Backend unavailable; fall through to local cache.
       }
-    }
 
-    setHydrated(true);
-  }, [defaultValues, storageKey]);
+      const localSnapshot = parseStoredState(window.localStorage.getItem(storageKey));
+      if (!isActive) return;
+
+      if (localSnapshot) {
+        setDraft({ ...defaultValues, ...localSnapshot.draft });
+        setActivity(localSnapshot.activity.length ? localSnapshot.activity : activitySeed);
+        setLastSavedAt(localSnapshot.lastSavedAt);
+        setBanner(localSnapshot.banner);
+        setConnectionState('local');
+        setSaveState('fallback');
+      } else {
+        setDraft(defaultValues);
+        setActivity(activitySeed);
+        setBanner(emptySnapshot.banner);
+        setConnectionState('empty');
+        setSaveState('idle');
+      }
+
+      setHydrated(true);
+    };
+
+    void loadState();
+
+    return () => {
+      isActive = false;
+    };
+  }, [activitySeed, defaultValues, storageKey, workflowId]);
 
   const validationIssues = useMemo(() => {
     return sections.flatMap((section) =>
@@ -278,40 +343,103 @@ export function WorkflowStudio({
     setDraft((current) => ({ ...current, [key]: value }));
     setDirty(true);
     setBanner('Unsaved changes detected.');
+    setSaveState('idle');
   }
 
-  function pushActivity(title: string, detail: string) {
-    const next: ActivityEntry = {
-      title,
-      detail,
-      timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
-    };
-
-    setActivity((current) => [next, ...current].slice(0, 8));
-  }
-
-  function saveDraft(note = 'Draft saved locally.') {
-    const timestamp = new Date().toISOString();
-    const payload = {
-      draft,
-      activity,
-      lastSavedAt: timestamp,
-      banner: note,
-    };
-
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(storageKey, JSON.stringify(payload));
+  function clearAutosaveTimer() {
+    if (autosaveRef.current !== null) {
+      window.clearTimeout(autosaveRef.current);
+      autosaveRef.current = null;
     }
-
-    setLastSavedAt(timestamp);
-    setDirty(false);
-    setBanner(note);
-    pushActivity('Draft saved', note);
   }
 
-  function handleAction(id: WorkflowActionId) {
+  function setActivityEntry(entry: WorkflowActivityEntry) {
+    setActivity((current) => [entry, ...current].slice(0, 8));
+  }
+
+  async function persistSnapshot(options: {
+    note: string;
+    entry: WorkflowActivityEntry;
+  }) {
+    clearAutosaveTimer();
+    const saveId = ++saveSequenceRef.current;
+    const nextActivity = [options.entry, ...activity].slice(0, 8);
+    const timestamp = new Date().toISOString();
+    const snapshot: WorkflowSnapshot = {
+      draft,
+      activity: nextActivity,
+      lastSavedAt: timestamp,
+      banner: options.note,
+    };
+
+    setSaveState('saving');
+    setBanner(options.note);
+
+    try {
+      const response = await fetch(`/api/workflows/${workflowId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snapshot }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Save failed with status ${response.status}`);
+      }
+
+      const data = (await response.json()) as { snapshot?: WorkflowSnapshot; updatedAt?: string };
+      if (saveId !== saveSequenceRef.current) return;
+
+      const savedSnapshot = data.snapshot ?? snapshot;
+      window.localStorage.setItem(storageKey, JSON.stringify(savedSnapshot));
+      setActivity(savedSnapshot.activity.length ? savedSnapshot.activity : nextActivity);
+      setLastSavedAt(savedSnapshot.lastSavedAt ?? data.updatedAt ?? timestamp);
+      setBanner(savedSnapshot.banner ?? options.note);
+      setDirty(false);
+      setConnectionState('backend');
+      setSaveState('saved');
+      return;
+    } catch {
+      if (saveId !== saveSequenceRef.current) return;
+
+      window.localStorage.setItem(storageKey, JSON.stringify(snapshot));
+      setActivity(nextActivity);
+      setLastSavedAt(timestamp);
+      setBanner(`${options.note} Saved locally until the backend is available.`);
+      setDirty(false);
+      setConnectionState('local');
+      setSaveState('fallback');
+    }
+  }
+
+  useEffect(() => {
+    if (!hydrated || !dirty) return;
+
+    clearAutosaveTimer();
+    autosaveRef.current = window.setTimeout(() => {
+      void persistSnapshot({
+        note: 'Autosaved changes to the backend draft store.',
+        entry: {
+          title: 'Autosaved changes',
+          detail: 'Edits were synchronized to the backend draft store.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
+    }, 1000);
+
+    return clearAutosaveTimer;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dirty, draft, hydrated]);
+
+  async function handleAction(id: WorkflowActionId) {
     if (id === 'save') {
-      saveDraft();
+      await persistSnapshot({
+        note: 'Draft saved to the backend store.',
+        entry: {
+          title: 'Draft saved',
+          detail: 'The current draft was written to the backend state store.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
       return;
     }
 
@@ -320,62 +448,118 @@ export function WorkflowStudio({
         validationIssues.length === 0
           ? 'Validation passed: no blocking issues found.'
           : `Validation found ${validationIssues.length} item(s) to resolve.`;
-      setBanner(message);
-      pushActivity('Validation run', message);
+      await persistSnapshot({
+        note: message,
+        entry: {
+          title: 'Validation run',
+          detail: message,
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
       return;
     }
 
     if (id === 'review') {
-      saveDraft('Sent to broker/team lead for review.');
-      pushActivity('Review requested', 'The current draft was routed for human approval.');
+      await persistSnapshot({
+        note: 'Sent to broker/team lead for review.',
+        entry: {
+          title: 'Review requested',
+          detail: 'The current draft was routed for human approval.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
       return;
     }
 
     if (id === 'preview') {
-      setBanner('Preview generated for quick review on desktop and mobile.');
-      pushActivity('Preview generated', 'The current draft preview is ready for sharing.');
+      await persistSnapshot({
+        note: 'Preview generated for quick review on desktop and mobile.',
+        entry: {
+          title: 'Preview generated',
+          detail: 'The current draft preview is ready for sharing.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
       return;
     }
 
     if (id === 'package') {
-      saveDraft('Offer package generated and stored in the CRM.');
-      pushActivity('Package generated', 'Supporting docs and offer contents were assembled.');
+      await persistSnapshot({
+        note: 'Offer package generated and stored in the CRM.',
+        entry: {
+          title: 'Package generated',
+          detail: 'Supporting docs and offer contents were assembled.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
       return;
     }
 
     if (id === 'signature') {
       if (validationIssues.length > 0) {
         setBanner('Resolve validation issues before sending for signature.');
-        pushActivity('Signature blocked', 'The draft still has blocking validation issues.');
+        setActivityEntry({
+          title: 'Signature blocked',
+          detail: 'The draft still has blocking validation issues.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        });
         return;
       }
 
-      saveDraft('Sent for signature from the workflow shell.');
-      pushActivity('Sent for signature', 'The package is ready for e-signature handoff.');
+      await persistSnapshot({
+        note: 'Sent for signature from the workflow shell.',
+        entry: {
+          title: 'Sent for signature',
+          detail: 'The package is ready for e-signature handoff.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
       return;
     }
 
     if (id === 'submit') {
       if (validationIssues.length > 0) {
         setBanner('Resolve validation issues before submitting.');
-        pushActivity('Submission blocked', 'The workflow is waiting for required fields.');
+        setActivityEntry({
+          title: 'Submission blocked',
+          detail: 'The workflow is waiting for required fields.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        });
         return;
       }
 
-      saveDraft('Submission prepared and queued for authorized handoff.');
-      pushActivity('Submission queued', 'The draft can now be sent to the external system.');
+      await persistSnapshot({
+        note: 'Submission prepared and queued for authorized handoff.',
+        entry: {
+          title: 'Submission queued',
+          detail: 'The draft can now be sent to the external system.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
       return;
     }
 
     if (id === 'docs') {
-      setBanner('Document and supporting file drawer opened.');
-      pushActivity('Docs opened', 'The user can attach source docs or supporting files.');
+      await persistSnapshot({
+        note: 'Document and supporting file drawer opened.',
+        entry: {
+          title: 'Docs opened',
+          detail: 'The user can attach source docs or supporting files.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
       return;
     }
 
     if (id === 'media') {
-      setBanner('Media drawer opened for photos and floorplans.');
-      pushActivity('Media opened', 'The user can upload or review listing media.');
+      await persistSnapshot({
+        note: 'Media drawer opened for photos and floorplans.',
+        entry: {
+          title: 'Media opened',
+          detail: 'The user can upload or review listing media.',
+          timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        },
+      });
     }
   }
 
@@ -398,7 +582,7 @@ export function WorkflowStudio({
             </div>
             <div className="flex flex-wrap gap-2">
               {actions.map((action) => (
-                <ActionButton key={action.id} action={action} onClick={() => handleAction(action.id)} />
+                <ActionButton key={action.id} action={action} onClick={() => void handleAction(action.id)} />
               ))}
             </div>
           </div>
@@ -418,7 +602,10 @@ export function WorkflowStudio({
                     {dirty ? 'Unsaved' : 'Saved'}
                   </span>
                   <span className="rounded-full border border-border bg-background px-2 py-1">
-                    {hydrated ? 'Local draft ready' : 'Hydrating'}
+                    {hydrated ? `Connected to ${connectionState}` : 'Hydrating'}
+                  </span>
+                  <span className="rounded-full border border-border bg-background px-2 py-1">
+                    {saveState}
                   </span>
                   <span className="rounded-full border border-border bg-background px-2 py-1">
                     Last saved {formatTimestamp(lastSavedAt)}
@@ -541,7 +728,11 @@ export function WorkflowStudio({
             </div>
             <div className="flex flex-wrap gap-2">
               {actions.map((action) => (
-                <ActionButton key={`${action.id}-bottom`} action={action} onClick={() => handleAction(action.id)} />
+                <ActionButton
+                  key={`${action.id}-bottom`}
+                  action={action}
+                  onClick={() => void handleAction(action.id)}
+                />
               ))}
             </div>
           </div>

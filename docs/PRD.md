@@ -270,3 +270,10 @@ Both workflows must support authorized external property data, human review gate
 - validation before MLS submission
 - mobile-safe sticky action controls, media actions, and offline recovery
 
+## 17. Backend-backed workflow state
+
+- workflow shells load and save through a backend route handler
+- each workflow uses `/api/workflows/[workflowId]` as the state endpoint
+- backend persistence is mirrored into local storage for resilience
+- the file-backed store in development can later be replaced with a database
+

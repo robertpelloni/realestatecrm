@@ -100,3 +100,10 @@
 - Mock CRM context and activity feeds
 - Validation gates for signature and MLS submission
 - Mobile-first interactions and save behavior
+
+## Phase 13 — Backend-backed workflow store
+
+- File-backed workflow snapshot store in development
+- API route for workflow state hydration and persistence
+- Client/server sync with local fallback caching
+- Easy future swap to a database-backed store

@@ -276,3 +276,9 @@
 - action buttons update activity history and user-facing banner state
 - mobile behavior uses a sticky bottom bar, stacked forms, and recovery-first draft state
 
+### Backend-backed workflow store
+- route handlers persist workflow snapshots to a file-backed store in development
+- workflow snapshots are available at `/api/workflows/[workflowId]`
+- client screens hydrate from the backend first and fall back to local storage for resilience
+- the backend store can later be swapped for a database without changing the UI contract
+

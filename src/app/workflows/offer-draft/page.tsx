@@ -18,7 +18,8 @@ export default function OfferDraftPage() {
       eyebrow="Offer workflow map"
       title="Offer Draft Screen"
       routeLabel="/workflows/offer-draft"
-      subtitle="Interactive offer drafting with editable form state, mock CRM data, local draft save, validation checks, and mobile-safe action controls."
+      subtitle="Interactive offer drafting with editable form state, backend draft persistence, mock CRM data, validation checks, and mobile-safe action controls."
+      workflowId="offer-draft"
       storageKey="workflow-offer-draft"
       summaryItems={[
         { label: 'Buyer', value: 'Jordan Smith', source: 'CRM' },

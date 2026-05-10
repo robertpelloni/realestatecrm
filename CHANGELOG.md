@@ -35,3 +35,9 @@
 - Added editable form state and mock CRM data to the offer and listing screens.
 - Implemented local draft persistence, validation gating, and activity feeds.
 - Added mobile-safe sticky action bars and offline-friendly recovery behavior.
+
+## [0.8.0] - Backend Workflow Store
+
+- Added a file-backed backend workflow snapshot store.
+- Hydrated offer and listing workflows from `/api/workflows/[workflowId]`.
+- Synced workflow saves between client, backend, and local fallback storage.

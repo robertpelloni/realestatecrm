@@ -11,8 +11,9 @@
 - [x] Add wireframe-level component maps for offer and listing screens.
 - [x] Build Next.js workflow shell pages for offer draft and listing entry.
 - [x] Add interactive form state, local draft persistence, and mock CRM data.
+- [x] Add backend-backed workflow persistence and API state hydration.
 - [ ] Connect workflow shells to live CRM data.
-- [ ] Add edit/save actions and state persistence.
+- [ ] Add database persistence for workflow snapshots.
 - [ ] Add mobile-specific route behavior and offline sync queue.
 
 ## Known Bugs / Tech Debt
