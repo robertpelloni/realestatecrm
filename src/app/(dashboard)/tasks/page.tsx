@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import AddTaskModal from '@/components/AddTaskModal';
 import { taskSchema } from '@/lib/validations/task';
+import Link from 'next/link';
 
 async function addTask(formData: FormData) {
   'use server';
@@ -40,11 +41,13 @@ async function addTask(formData: FormData) {
 }
 
 export default async function TasksPage(props: {
-  searchParams?: Promise<{ status?: string; q?: string }>;
+  searchParams?: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.q || '';
   const statusFilter = searchParams?.status || 'ALL';
+  const currentPage = Math.max(1, Number(searchParams?.page) || 1);
+  const pageSize = 10;
 
   const whereClause: any = {};
 
@@ -56,18 +59,20 @@ export default async function TasksPage(props: {
     whereClause.status = statusFilter;
   }
 
-  const tasks = await prisma.task.findMany({
-    where: whereClause,
-    include: {
-      assignedTo: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+  const [tasks, totalCount] = await Promise.all([
+    prisma.task.findMany({
+      where: whereClause,
+      include: { assignedTo: true },
+      orderBy: { createdAt: 'desc' },
+      take: pageSize,
+      skip: (currentPage - 1) * pageSize,
+    }),
+    prisma.task.count({ where: whereClause }),
+  ]);
 
   const workspaces = await prisma.workspace.findMany();
   const users = await prisma.user.findMany({ select: { id: true, name: true } });
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -93,7 +98,14 @@ export default async function TasksPage(props: {
           <select
             name="status"
             defaultValue={statusFilter}
-            onChange={(e) => e.target.form?.submit()}
+            onChange={(e) => {
+              const form = e.target.form;
+              if (form) {
+                const pageInput = form.querySelector('input[name="page"]') as HTMLInputElement;
+                if (pageInput) pageInput.value = '1';
+                form.submit();
+              }
+            }}
             className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="ALL">All Statuses</option>
@@ -101,6 +113,7 @@ export default async function TasksPage(props: {
             <option value="IN_PROGRESS">In Progress</option>
             <option value="DONE">Done</option>
           </select>
+          <input type="hidden" name="page" value={currentPage} />
           <button
             type="submit"
             className="px-4 py-2 bg-secondary text-secondary-foreground text-sm font-medium rounded-md hover:bg-secondary/90 transition-colors"
@@ -169,6 +182,27 @@ export default async function TasksPage(props: {
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className="p-4 border-t border-border flex items-center justify-between text-sm text-muted-foreground bg-muted/10">
+          <span>
+            Showing {totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1} to{' '}
+            {Math.min(currentPage * pageSize, totalCount)} of {totalCount} entries
+          </span>
+          <div className="flex gap-2">
+            <Link
+              href={`/tasks?q=${query}&status=${statusFilter}&page=${currentPage - 1}`}
+              className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}`}
+            >
+              Prev
+            </Link>
+            <Link
+              href={`/tasks?q=${query}&status=${statusFilter}&page=${currentPage + 1}`}
+              className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}`}
+            >
+              Next
+            </Link>
+          </div>
         </div>
       </div>
     </div>

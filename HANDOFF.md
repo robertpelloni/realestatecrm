@@ -5,13 +5,14 @@
 **Current Session:**
 
 - Solved the complex Prisma schema ambiguity preventing the addition of Task due dates and assignments. Refactored the schema carefully using explicit relation names (`@relation("TaskAssignee")`).
-- Generated and pushed the updated database schema.
-- Poly-filled `AddTaskModal` UI and Zod schemas to handle the new `dueDate` and `assignedToId` Poly-Morphic assignments. The Tasks list now visually represents these fields.
-- Implemented robust `take`/`skip` server-side pagination on the `Leads` list view, connected poly-morphically to the existing URL search params filtering functionality.
-- Verified build stability and bumped the app version to `0.22.0`.
+- Expanded URL-driven server-side Pagination (`take`/`skip`) to `/contacts` and `/tasks` pages to ensure complete data-table parity.
+- Extended Poly-morphic Activity Timelines. Users can now log Notes via `AddActivityForm` on `Deals` and `Contacts` details views, exactly like Leads.
+- Conducted an in-depth code review of the upstream `WorkflowStudio` components.
+- Generated `WORKFLOW_ANALYSIS.md` detailing the upcoming Prisma schema requirements to migrate workflows from Local Storage mock logic to persistent database entries.
+- Bumped version to `0.23.0`.
 
 **Next Steps for Next Model/Agent:**
 
-1. **Extend Pagination:** Pagination is working perfectly on `/leads`. Apply this exact same architectural pattern (`take`, `skip`, URL param parsing) to the `/contacts` and `/tasks` pages to ensure UI parity.
-2. **Workflow DB Hookups:** The upstream workflow static shells (`/workflows/offer-draft` and `/workflows/listing-entry`) are still completely static. Begin mapping their JSON output to server actions that store drafts in the Database.
-3. **Activity Poly-morphism:** `AddActivityForm` is only active on the `Lead` detail page. Expand this component to `deals/[id]/page.tsx` and `contacts/[id]/page.tsx` so users can log notes everywhere.
+1. **Workflow DB Hookups:** Reference `WORKFLOW_ANALYSIS.md`. Scaffold the `WorkflowSession` Prisma model and wire it into the `WorkflowStudio` components via Next.js Server Actions.
+2. **Dashboard Interactive Polish:** The main dashboard currently provides static navigation. Add deep-links from the aggregate stats (e.g., clicking "Tasks Due" takes you to `/tasks?status=TODO`).
+3. **Advanced Filtering:** Consider building a complex multi-select filtering component for the data tables to replace the basic `<select>` dropdowns.

@@ -104,3 +104,9 @@
 - Updated `Task` Prisma model and Zod schemas to support `dueDate` and `assignedToId`.
 - Updated `AddTaskModal` UI and the backend Server Action to capture, validate, and store Task deadlines and assignments.
 - Implemented `take`/`skip` server-side pagination on the Leads list view using Next.js `searchParams`.
+
+## [0.23.0] - Universal Pagination & Activity Propagation
+
+- Extended the `take`/`skip` server-side pagination model uniformly across the `Contacts` and `Tasks` list pages to match `Leads`.
+- Expanded the polymorphic `AddActivityForm` to `Deals` and `Contacts` detail views, ensuring unified timeline tracking across the entire CRM stack.
+- Completed architectural analysis of the upstream `WorkflowStudio` components, generating `WORKFLOW_ANALYSIS.md` to map out upcoming DB integration phases.

@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import AddContactModal from '@/components/AddContactModal';
 import { contactSchema } from '@/lib/validations/contact';
+import Link from 'next/link';
 
 async function addContact(formData: FormData) {
   'use server';
@@ -37,9 +38,13 @@ async function addContact(formData: FormData) {
   }
 }
 
-export default async function ContactsPage(props: { searchParams?: Promise<{ q?: string }> }) {
+export default async function ContactsPage(props: {
+  searchParams?: Promise<{ q?: string; page?: string }>;
+}) {
   const searchParams = await props.searchParams;
   const query = searchParams?.q || '';
+  const currentPage = Math.max(1, Number(searchParams?.page) || 1);
+  const pageSize = 10;
 
   const whereClause: any = {};
   if (query) {
@@ -51,14 +56,18 @@ export default async function ContactsPage(props: { searchParams?: Promise<{ q?:
     ];
   }
 
-  const contacts = await prisma.contact.findMany({
-    where: whereClause,
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+  const [contacts, totalCount] = await Promise.all([
+    prisma.contact.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
+      take: pageSize,
+      skip: (currentPage - 1) * pageSize,
+    }),
+    prisma.contact.count({ where: whereClause }),
+  ]);
 
   const workspaces = await prisma.workspace.findMany();
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -84,6 +93,7 @@ export default async function ContactsPage(props: { searchParams?: Promise<{ q?:
             placeholder="Search contacts..."
             className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
+          <input type="hidden" name="page" value={currentPage} />
           <button
             type="submit"
             className="px-4 py-2 bg-secondary text-secondary-foreground text-sm font-medium rounded-md hover:bg-secondary/90 transition-colors"
@@ -107,7 +117,9 @@ export default async function ContactsPage(props: { searchParams?: Promise<{ q?:
               {contacts.map((contact) => (
                 <tr key={contact.id} className="hover:bg-muted/10 transition-colors">
                   <td className="px-6 py-4 font-medium">
-                    {contact.firstName} {contact.lastName}
+                    <Link href={`/contacts/${contact.id}`} className="hover:underline">
+                      {contact.firstName} {contact.lastName}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 text-muted-foreground">{contact.email || '--'}</td>
                   <td className="px-6 py-4 text-muted-foreground">{contact.phone || '--'}</td>
@@ -130,6 +142,27 @@ export default async function ContactsPage(props: { searchParams?: Promise<{ q?:
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className="p-4 border-t border-border flex items-center justify-between text-sm text-muted-foreground bg-muted/10">
+          <span>
+            Showing {totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1} to{' '}
+            {Math.min(currentPage * pageSize, totalCount)} of {totalCount} entries
+          </span>
+          <div className="flex gap-2">
+            <Link
+              href={`/contacts?q=${query}&page=${currentPage - 1}`}
+              className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}`}
+            >
+              Prev
+            </Link>
+            <Link
+              href={`/contacts?q=${query}&page=${currentPage + 1}`}
+              className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}`}
+            >
+              Next
+            </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -37,8 +37,8 @@ async function addActivity(formData: FormData) {
       },
     });
 
-    if (data.dealId) {
-      revalidatePath(`/deals/${data.dealId}`);
+    if (data.contactId) {
+      revalidatePath(`/contacts/${data.contactId}`);
     }
   } catch (error) {
     console.error('Failed to add activity:', error);
@@ -46,12 +46,11 @@ async function addActivity(formData: FormData) {
   }
 }
 
-export default async function DealDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const deal = await prisma.deal.findUnique({
+  const contact = await prisma.contact.findUnique({
     where: { id: resolvedParams.id },
     include: {
-      contact: true,
       workspace: true,
       Activity: {
         orderBy: { createdAt: 'desc' },
@@ -59,7 +58,7 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
     },
   });
 
-  if (!deal) {
+  if (!contact) {
     notFound();
   }
 
@@ -67,17 +66,19 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center gap-4">
         <Link
-          href="/deals"
+          href="/contacts"
           className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1"
         >
-          &larr; Back to Deals
+          &larr; Back to Contacts
         </Link>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{deal.title}</h1>
-          <p className="text-muted-foreground">Deal Profile</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {contact.firstName} {contact.lastName}
+          </h1>
+          <p className="text-muted-foreground">Contact Profile</p>
         </div>
         <div className="flex gap-2">
           <button className="px-4 py-2 bg-muted text-foreground font-medium rounded-md hover:bg-muted/80 transition-colors">
@@ -89,34 +90,26 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1 space-y-6">
           <div className="bg-background border border-border rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-bold mb-4">Deal Info</h2>
+            <h2 className="text-lg font-bold mb-4">Contact Info</h2>
             <div className="space-y-4">
               <div>
                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                  Stage
+                  Email
                 </span>
-                <p className="font-medium mt-1">{deal.stage}</p>
+                <p className="font-medium mt-1">{contact.email || '--'}</p>
               </div>
               <div>
                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                  Value
+                  Phone
                 </span>
-                <p className="font-medium mt-1">
-                  {deal.value
-                    ? new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: 'USD',
-                        maximumFractionDigits: 0,
-                      }).format(deal.value)
-                    : '--'}
-                </p>
+                <p className="font-medium mt-1">{contact.phone || '--'}</p>
               </div>
               <div>
                 <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                  Contact
+                  Added
                 </span>
                 <p className="font-medium mt-1">
-                  {deal.contact.firstName} {deal.contact.lastName}
+                  {new Date(contact.createdAt).toLocaleDateString()}
                 </p>
               </div>
             </div>
@@ -127,12 +120,12 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
           <div className="bg-background border border-border rounded-xl shadow-sm p-6 min-h-[400px]">
             <h2 className="text-lg font-bold mb-4">Activity Timeline</h2>
             <div className="space-y-6">
-              {deal.Activity.length === 0 ? (
+              {contact.Activity.length === 0 ? (
                 <div className="text-sm text-muted-foreground text-center py-8">
                   No activities recorded yet.
                 </div>
               ) : (
-                deal.Activity.map((activity) => (
+                contact.Activity.map((activity) => (
                   <div key={activity.id} className="flex gap-4">
                     <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                       <span className="text-sm">{activity.type === 'NOTE' ? '📝' : '⚡'}</span>
@@ -155,9 +148,9 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
 
             <AddActivityForm
               addActivityAction={addActivity}
-              workspaceId={deal.workspaceId}
-              entityType="dealId"
-              entityId={deal.id}
+              workspaceId={contact.workspaceId}
+              entityType="contactId"
+              entityId={contact.id}
             />
           </div>
         </div>
