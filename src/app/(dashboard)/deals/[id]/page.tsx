@@ -56,6 +56,9 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
       Activity: {
         orderBy: { createdAt: 'desc' },
       },
+      WorkflowSession: {
+        orderBy: { createdAt: 'desc' },
+      },
     },
   });
 
@@ -118,6 +121,52 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
                 <p className="font-medium mt-1">
                   {deal.contact.firstName} {deal.contact.lastName}
                 </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-background border border-border rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-bold mb-4">Workflows</h2>
+            <div className="space-y-4">
+              <Link
+                href={`/workflows/offer-draft`}
+                className="block w-full text-center px-4 py-2 bg-muted text-foreground text-sm font-medium rounded-md hover:bg-muted/80 transition-colors"
+              >
+                + New Offer Draft
+              </Link>
+              <Link
+                href={`/workflows/listing-entry`}
+                className="block w-full text-center px-4 py-2 bg-muted text-foreground text-sm font-medium rounded-md hover:bg-muted/80 transition-colors"
+              >
+                + New Listing Entry
+              </Link>
+
+              <div className="mt-6 space-y-3 pt-4 border-t border-border">
+                {deal.WorkflowSession.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center">No active workflows</p>
+                ) : (
+                  deal.WorkflowSession.map((wf) => (
+                    <Link
+                      href={`/workflows/${wf.type === 'OFFER_DRAFT' ? 'offer-draft' : 'listing-entry'}?sessionId=${wf.id}`}
+                      key={wf.id}
+                      className="block p-3 rounded-lg border border-border hover:border-primary/50 transition-colors group"
+                    >
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                          {wf.type === 'OFFER_DRAFT' ? 'Offer Draft' : 'Listing Entry'}
+                        </p>
+                        <span
+                          className={`text-[10px] uppercase px-2 py-0.5 rounded-full ${wf.status === 'SUBMITTED' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}
+                        >
+                          {wf.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Updated {new Date(wf.updatedAt).toLocaleDateString()}
+                      </p>
+                    </Link>
+                  ))
+                )}
               </div>
             </div>
           </div>

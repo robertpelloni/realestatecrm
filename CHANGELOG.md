@@ -124,3 +124,8 @@
 - Converted `/workflows/offer-draft` and `/workflows/listing-entry` to dynamic Server Components that parse `?sessionId` from the URL.
 - These workflow pages now fetch existing `WorkflowSession` records from Prisma and inject their parsed JSON histories into `WorkflowStudio` components.
 - The `WorkflowStudio` interactive shell is now a true persistent interface connected to the SQLite backend.
+
+## [0.26.0] - Phase 2 Portal Scaffolding & Deal Workflows
+
+- Integrated `WorkflowSession` routing deeply into the Deal Details view. Users can now spin up active Offer Drafts and Listing Entries directly associated to a specific CRM `Deal`.
+- Created the foundational `(portal)` route group, establishing the client-facing UI shell (separate from the agent dashboard) where clients will eventually sign and review synced workflows.

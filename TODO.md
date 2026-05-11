@@ -28,3 +28,9 @@
 
 - Port conflict handling for tests needs a robust setup (`playwright` config).
 - Prisma SQLite dev.db causes occasional locking if dev server and tests hit it concurrently.
+
+## Phase 2 Roadmap Items (Immediate)
+
+- [x] **Client Portal Routing:** Create `src/app/(portal)` route group with layout. Add magic-link or dedicated Auth checks.
+- [x] **Portal Home:** Display assigned Deals and Workflows for the client.
+- [x] **Workflow Deal Integration:** Link workflows directly to Deal IDs in the UI so users can trigger them from `/deals/[id]`.

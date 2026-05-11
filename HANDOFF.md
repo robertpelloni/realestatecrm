@@ -4,16 +4,13 @@
 
 **Current Session:**
 
-- Intercepted a divergent `origin/main` upstream that introduced Phase 2 Workflow engine scaffolding. Resolving the conflict effectively and maintaining zero feature loss.
-- Analyzed and executed the `WORKFLOW_ANALYSIS.md` blueprint:
-  - Added the `WorkflowSession` model to `prisma.schema` to permanently store JSON state for real-estate workflows.
-  - Wired the visual `WorkflowStudio` components directly to the database via robust Server Actions (`saveWorkflowSession` and `submitWorkflowSession`). Workflows are no longer ephemeral in Local Storage.
-  - Enabled Draft Resumption. Passing a `?sessionId=cuid` into the `workflows/*` routes will pull the specific session from Prisma, deserialize it, and rehydrate the `WorkflowStudio` component seamlessly.
-- Reverted a complex `dueDate` poly-morphic schema update that was causing Prisma to panic, explicitly planning it out for a future, isolated agent loop.
-- Bumped Version to `0.25.0`.
+- Finalized Phase 2 Workflow engine integration by deeply linking `WorkflowSessions` to `Deals`. Users can generate "New Offer Drafts" or "New Listing Entries" directly from `deals/[id]/page.tsx`.
+- Navigated a complex Next.js 15 route conflict between the `(dashboard)` root `page.tsx` and the newly scaffolded `(portal)` route group. Safely resolved by placing the portal under `/portal`.
+- Scaffolded the baseline UI for the Client Portal where end-users will eventually review and sign the workflows prepared by agents.
+- Bumped version to `0.26.0`.
 
 **Next Steps for Next Model/Agent:**
 
-1. **Dashboard Interactive Polish:** The main dashboard currently provides static navigation. Add deep-links from the aggregate stats (e.g., clicking "Tasks Due" takes you to `/tasks?status=TODO`).
-2. **Client Portal Foundation:** Begin scaffolding the `(portal)` route group for Phase 2. This requires magic-link or specialized auth verification allowing clients to view their `Deal` and related `WorkflowSessions`.
-3. **Re-attempt Task Schemas:** The `Task.assignedToId` mapping to `User` failed earlier due to ambiguous relation definitions overlapping with `Contact.assignedTo`. Find a clean way to apply this schema mutation.
+1. **Portal Authentication:** The `/portal` route is currently static mock data. It needs an authentication layer (e.g., Magic Links via NextAuth, or a specific `role="CLIENT"` check) to load the actual Deals and Workflows tied to the logged-in client's email.
+2. **Re-attempt Task Schemas:** The `Task.assignedToId` mapping to `User` failed earlier due to ambiguous relation definitions overlapping with `Contact.assignedTo`. Find a clean way to apply this schema mutation.
+3. **Advanced Filtering:** Consider building a complex multi-select filtering component for the data tables to replace the basic `<select>` dropdowns.
