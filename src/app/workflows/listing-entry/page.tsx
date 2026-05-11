@@ -1,3 +1,4 @@
+import prisma from '@/lib/prisma';
 import { WorkflowStudio } from '@/components/workflows/workflow-studio';
 
 const listingDefaultValues = {
@@ -14,7 +15,9 @@ const listingDefaultValues = {
   showingInstructions: 'Lockbox on side door; schedule 24 hours ahead.',
 };
 
-export default function ListingEntryPage() {
+export default async function ListingEntryPage() {
+  const workspaces = await prisma.workspace.findMany();
+  const wsId = workspaces[0]?.id || 'mock-ws';
   return (
     <WorkflowStudio
       eyebrow="Listing workflow map"
@@ -23,6 +26,7 @@ export default function ListingEntryPage() {
       subtitle="Interactive listing entry with editable property data, backend draft persistence, mock CRM records, validation, and mobile-first controls."
       workflowId="listing-entry"
       storageKey="workflow-listing-entry"
+      workspaceId={wsId}
       summaryItems={[
         { label: 'Seller', value: 'Taylor Johnson', source: 'CRM' },
         { label: 'Listing', value: '412 Lakeview Dr', source: 'Approved source' },

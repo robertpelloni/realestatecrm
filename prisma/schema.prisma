@@ -24,6 +24,7 @@ model User {
   leads         Lead[]
   contacts      Contact[]
   deals         Deal[]
+  workflows     WorkflowSession[]
   activities    Activity[]
   assignedTasks Task[]            @relation("TaskAssignee")
 }
@@ -34,11 +35,12 @@ model Workspace {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members  WorkspaceMember[]
-  leads    Lead[]
-  contacts Contact[]
-  deals    Deal[]
-  Activity Activity[]
+  members   WorkspaceMember[]
+  leads     Lead[]
+  contacts  Contact[]
+  deals     Deal[]
+  workflows WorkflowSession[]
+  Activity  Activity[]
 }
 
 model WorkspaceMember {
@@ -82,10 +84,11 @@ model Lead {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  contact   Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  user      User?      @relation(fields: [userId], references: [id])
-  Activity  Activity[]
+  workspace       Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact         Contact           @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user            User?             @relation(fields: [userId], references: [id])
+  Activity        Activity[]
+  WorkflowSession WorkflowSession[]
 }
 
 model Deal {
@@ -99,10 +102,11 @@ model Deal {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  contact   Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  user      User?      @relation(fields: [userId], references: [id])
-  Activity  Activity[]
+  workspace       Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact         Contact           @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user            User?             @relation(fields: [userId], references: [id])
+  Activity        Activity[]
+  WorkflowSession WorkflowSession[]
 }
 
 model Task {
@@ -140,4 +144,24 @@ model Activity {
   lead      Lead?     @relation(fields: [leadId], references: [id], onDelete: Cascade)
   deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
   contact   Contact?  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowSession {
+  id     String @id @default(cuid())
+  type   String // e.g., 'OFFER_DRAFT', 'LISTING_ENTRY'
+  status String @default("DRAFT") // DRAFT, SUBMITTED, APPROVED
+  data   String // JSON payload of the workflow state
+
+  workspaceId String
+  userId      String?
+  leadId      String?
+  dealId      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+  lead      Lead?     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
 }

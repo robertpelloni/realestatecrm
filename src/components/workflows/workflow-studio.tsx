@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import { saveWorkflowSession, submitWorkflowSession } from '@/lib/actions/workflow';
 
 import {
   createEmptyWorkflowSnapshot,
@@ -60,6 +62,8 @@ type WorkflowStudioProps = {
   routeLabel: string;
   workflowId: string;
   storageKey: string;
+  workspaceId: string;
+  existingSessionId?: string;
   summaryItems: SummaryItem[];
   sections: WorkflowSection[];
   actions?: WorkflowAction[];
@@ -245,6 +249,8 @@ export function WorkflowStudio({
   routeLabel,
   workflowId,
   storageKey,
+  workspaceId,
+  existingSessionId,
   summaryItems,
   sections,
   actions,
@@ -449,6 +455,14 @@ export function WorkflowStudio({
           timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
         },
       });
+
+      const payload = JSON.stringify(draft);
+      const res = await saveWorkflowSession(workspaceId, workflowId, payload, existingSessionId);
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success('Workflow draft saved!');
+      }
       return;
     }
 

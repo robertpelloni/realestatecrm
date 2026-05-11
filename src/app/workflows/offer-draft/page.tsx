@@ -1,3 +1,4 @@
+import prisma from '@/lib/prisma';
 import { WorkflowStudio } from '@/components/workflows/workflow-studio';
 
 const offerDefaultValues = {
@@ -12,7 +13,9 @@ const offerDefaultValues = {
   agentNotes: 'Use recent comparable sales to support the price band.',
 };
 
-export default function OfferDraftPage() {
+export default async function OfferDraftPage() {
+  const workspaces = await prisma.workspace.findMany();
+  const wsId = workspaces[0]?.id || 'mock-ws';
   return (
     <WorkflowStudio
       eyebrow="Offer workflow map"
@@ -21,6 +24,7 @@ export default function OfferDraftPage() {
       subtitle="Interactive offer drafting with editable form state, backend draft persistence, mock CRM data, validation checks, and mobile-safe action controls."
       workflowId="offer-draft"
       storageKey="workflow-offer-draft"
+      workspaceId={wsId}
       summaryItems={[
         { label: 'Buyer', value: 'Jordan Smith', source: 'CRM' },
         { label: 'Property', value: '412 Lakeview Dr', source: 'MLS' },

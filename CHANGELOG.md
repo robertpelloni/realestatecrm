@@ -110,3 +110,10 @@
 - Extended the `take`/`skip` server-side pagination model uniformly across the `Contacts` and `Tasks` list pages to match `Leads`.
 - Expanded the polymorphic `AddActivityForm` to `Deals` and `Contacts` detail views, ensuring unified timeline tracking across the entire CRM stack.
 - Completed architectural analysis of the upstream `WorkflowStudio` components, generating `WORKFLOW_ANALYSIS.md` to map out upcoming DB integration phases.
+
+## [0.24.0] - Workflow Schema Wiring & Dashboard Deep Linking
+
+- Scaffolded `WorkflowSession` model in Prisma to track user workflow drafts (e.g. `OFFER_DRAFT`, `LISTING_ENTRY`).
+- Removed local-storage mock handlers in upstream `WorkflowStudio` components.
+- Introduced `src/lib/actions/workflow.ts` (Next.js Server Actions) to save and submit JSON workflow payloads directly to the SQLite backend.
+- Converted aggregate dashboard metrics into deep-links (e.g., clicking "Tasks Due" pushes the user to `/tasks?status=TODO`).

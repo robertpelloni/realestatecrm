@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import prisma from '@/lib/prisma';
 
 export default async function DashboardHome() {
@@ -20,7 +21,10 @@ export default async function DashboardHome() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-6 bg-background border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <Link
+          href="/leads?status=NEW"
+          className="p-6 bg-background border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow block"
+        >
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Active Leads</p>
@@ -43,9 +47,12 @@ export default async function DashboardHome() {
               </svg>
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="p-6 bg-background border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <Link
+          href="/deals"
+          className="p-6 bg-background border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow block"
+        >
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Active Pipeline</p>
@@ -74,9 +81,12 @@ export default async function DashboardHome() {
               </svg>
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="p-6 bg-background border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <Link
+          href="/tasks?status=TODO"
+          className="p-6 bg-background border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow block"
+        >
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Tasks Due</p>
@@ -99,9 +109,12 @@ export default async function DashboardHome() {
               </svg>
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="p-6 bg-background border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <Link
+          href="/contacts"
+          className="p-6 bg-background border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow block"
+        >
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total Contacts</p>
@@ -124,7 +137,7 @@ export default async function DashboardHome() {
               </svg>
             </div>
           </div>
-        </div>
+        </Link>
       </div>
     </div>
   );
