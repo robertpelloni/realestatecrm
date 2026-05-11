@@ -20,11 +20,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  workspaces WorkspaceMember[]
-  leads      Lead[]
-  contacts   Contact[]
-  deals      Deal[]
-  activities Activity[]
+  workspaces    WorkspaceMember[]
+  leads         Lead[]
+  contacts      Contact[]
+  deals         Deal[]
+  activities    Activity[]
+  assignedTasks Task[]            @relation("TaskAssignee")
 }
 
 model Workspace {
@@ -105,13 +106,17 @@ model Deal {
 }
 
 model Task {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  status      String   @default("TODO")
-  workspaceId String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String    @id @default(cuid())
+  title        String
+  description  String?
+  status       String    @default("TODO")
+  workspaceId  String
+  dueDate      DateTime?
+  assignedToId String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  assignedTo User? @relation("TaskAssignee", fields: [assignedToId], references: [id])
 }
 
 model Activity {

@@ -27,7 +27,12 @@ export default function ListingEntryPage() {
         { label: 'Seller', value: 'Taylor Johnson', source: 'CRM' },
         { label: 'Listing', value: '412 Lakeview Dr', source: 'Approved source' },
         { label: 'Agreement', value: 'Signed and active', source: 'Docs' },
-        { label: 'Source provenance', value: 'MLS + BS&A + Realcomp', source: 'Tracked', accent: true },
+        {
+          label: 'Source provenance',
+          value: 'MLS + BS&A + Realcomp',
+          source: 'Tracked',
+          accent: true,
+        },
       ]}
       sections={[
         {
@@ -35,20 +40,63 @@ export default function ListingEntryPage() {
           description:
             'Prefill the core property record and keep the values visible while the agent edits the listing.',
           fields: [
-            { key: 'sellerName', label: 'Seller name', type: 'text', required: true, source: 'CRM' },
-            { key: 'propertyAddress', label: 'Property address', type: 'text', required: true, source: 'MLS' },
-            { key: 'listingPrice', label: 'List price', type: 'number', required: true, source: 'Draft' },
+            {
+              key: 'sellerName',
+              label: 'Seller name',
+              type: 'text',
+              required: true,
+              source: 'CRM',
+            },
+            {
+              key: 'propertyAddress',
+              label: 'Property address',
+              type: 'text',
+              required: true,
+              source: 'MLS',
+            },
+            {
+              key: 'listingPrice',
+              label: 'List price',
+              type: 'number',
+              required: true,
+              source: 'Draft',
+            },
             {
               key: 'propertyType',
               label: 'Property type',
               type: 'select',
               required: true,
-              options: ['Single Family', 'Condo', 'Townhouse', 'Multi-Family', 'Land', 'Commercial'],
+              options: [
+                'Single Family',
+                'Condo',
+                'Townhouse',
+                'Multi-Family',
+                'Land',
+                'Commercial',
+              ],
               source: 'MLS',
             },
-            { key: 'beds', label: 'Beds', type: 'number', required: true, source: 'Approved source' },
-            { key: 'baths', label: 'Baths', type: 'number', required: true, source: 'Approved source' },
-            { key: 'squareFeet', label: 'Square feet', type: 'number', required: true, source: 'Approved source' },
+            {
+              key: 'beds',
+              label: 'Beds',
+              type: 'number',
+              required: true,
+              source: 'Approved source',
+            },
+            {
+              key: 'baths',
+              label: 'Baths',
+              type: 'number',
+              required: true,
+              source: 'Approved source',
+            },
+            {
+              key: 'squareFeet',
+              label: 'Square feet',
+              type: 'number',
+              required: true,
+              source: 'Approved source',
+            },
             { key: 'lotSize', label: 'Lot size (acres)', type: 'number', source: 'Parcel' },
             {
               key: 'status',
@@ -112,7 +160,8 @@ export default function ListingEntryPage() {
       activitySeed={[
         {
           title: 'Loaded listing shell',
-          detail: 'Interactive listing workflow opened with mock property data and source provenance.',
+          detail:
+            'Interactive listing workflow opened with mock property data and source provenance.',
           timestamp: 'Now',
         },
         {

@@ -25,7 +25,12 @@ export default function OfferDraftPage() {
         { label: 'Buyer', value: 'Jordan Smith', source: 'CRM' },
         { label: 'Property', value: '412 Lakeview Dr', source: 'MLS' },
         { label: 'Deal stage', value: 'Offer drafting', source: 'Workflow' },
-        { label: 'Source provenance', value: 'MiRealSource + Realist', source: 'Tracked', accent: true },
+        {
+          label: 'Source provenance',
+          value: 'MiRealSource + Realist',
+          source: 'Tracked',
+          accent: true,
+        },
       ]}
       sections={[
         {
@@ -34,8 +39,20 @@ export default function OfferDraftPage() {
             'Edit the record with the offer terms that should flow into the package and CRM timeline.',
           fields: [
             { key: 'buyerName', label: 'Buyer name', type: 'text', required: true, source: 'CRM' },
-            { key: 'propertyAddress', label: 'Property address', type: 'text', required: true, source: 'MLS' },
-            { key: 'offerPrice', label: 'Offer price', type: 'number', required: true, source: 'Draft' },
+            {
+              key: 'propertyAddress',
+              label: 'Property address',
+              type: 'text',
+              required: true,
+              source: 'MLS',
+            },
+            {
+              key: 'offerPrice',
+              label: 'Offer price',
+              type: 'number',
+              required: true,
+              source: 'Draft',
+            },
             { key: 'earnestMoney', label: 'Earnest money', type: 'number', source: 'Draft' },
           ],
         },

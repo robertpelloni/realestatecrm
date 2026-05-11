@@ -7,9 +7,11 @@ import toast from 'react-hot-toast';
 export default function AddTaskModal({
   addTaskAction,
   workspaces,
+  users,
 }: {
   addTaskAction: (formData: FormData) => Promise<{ error?: string } | void>;
   workspaces: { id: string; name: string }[];
+  users: { id: string; name: string | null }[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,7 @@ export default function AddTaskModal({
     if (result && result.error) {
       setError(result.error);
     } else {
-      toast.success('Success!');
+      toast.success('Task created successfully!');
       setIsOpen(false);
       router.refresh();
     }
@@ -65,16 +67,41 @@ export default function AddTaskModal({
                 />
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <select
+                    name="status"
+                    required
+                    className="w-full bg-muted/50 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    <option value="TODO">To Do</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="DONE">Done</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Due Date</label>
+                  <input
+                    name="dueDate"
+                    type="date"
+                    className="w-full bg-muted/50 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
+                <label className="text-sm font-medium">Assign To</label>
                 <select
-                  name="status"
-                  required
+                  name="assignedToId"
                   className="w-full bg-muted/50 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 >
-                  <option value="TODO">To Do</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="DONE">Done</option>
+                  <option value="">Unassigned</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name || u.id}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -97,7 +124,6 @@ export default function AddTaskModal({
                 <button
                   type="button"
                   onClick={() => {
-                    toast.success('Success!');
                     setIsOpen(false);
                     setError(null);
                   }}

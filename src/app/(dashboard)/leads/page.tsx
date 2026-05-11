@@ -47,11 +47,13 @@ async function addLead(formData: FormData) {
 }
 
 export default async function LeadsPage(props: {
-  searchParams?: Promise<{ status?: string; q?: string }>;
+  searchParams?: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.q || '';
   const statusFilter = searchParams?.status || 'ALL';
+  const currentPage = Math.max(1, Number(searchParams?.page) || 1);
+  const pageSize = 10;
 
   const whereClause: any = {};
 
@@ -67,17 +69,19 @@ export default async function LeadsPage(props: {
     whereClause.status = statusFilter;
   }
 
-  const leads = await prisma.lead.findMany({
-    where: whereClause,
-    include: {
-      contact: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+  const [leads, totalCount] = await Promise.all([
+    prisma.lead.findMany({
+      where: whereClause,
+      include: { contact: true },
+      orderBy: { createdAt: 'desc' },
+      take: pageSize,
+      skip: (currentPage - 1) * pageSize,
+    }),
+    prisma.lead.count({ where: whereClause }),
+  ]);
 
   const workspaces = await prisma.workspace.findMany();
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -106,7 +110,15 @@ export default async function LeadsPage(props: {
           <select
             name="status"
             defaultValue={statusFilter}
-            onChange={(e) => e.target.form?.submit()}
+            onChange={(e) => {
+              // reset page on filter change
+              const form = e.target.form;
+              if (form) {
+                const pageInput = form.querySelector('input[name="page"]') as HTMLInputElement;
+                if (pageInput) pageInput.value = '1';
+                form.submit();
+              }
+            }}
             className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="ALL">All Statuses</option>
@@ -114,6 +126,7 @@ export default async function LeadsPage(props: {
             <option value="CONTACTED">CONTACTED</option>
             <option value="QUALIFIED">QUALIFIED</option>
           </select>
+          <input type="hidden" name="page" value={currentPage} />
           <button
             type="submit"
             className="px-4 py-2 bg-secondary text-secondary-foreground text-sm font-medium rounded-md hover:bg-secondary/90 transition-colors"
@@ -198,18 +211,22 @@ export default async function LeadsPage(props: {
 
         <div className="p-4 border-t border-border flex items-center justify-between text-sm text-muted-foreground bg-muted/10">
           <span>
-            Showing 1 to {leads.length} of {leads.length} entries
+            Showing {(currentPage - 1) * pageSize + 1} to{' '}
+            {Math.min(currentPage * pageSize, totalCount)} of {totalCount} entries
           </span>
           <div className="flex gap-2">
-            <button
-              className="px-3 py-1 border border-border rounded hover:bg-muted disabled:opacity-50"
-              disabled
+            <Link
+              href={`/leads?q=${query}&status=${statusFilter}&page=${currentPage - 1}`}
+              className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}`}
             >
               Prev
-            </button>
-            <button className="px-3 py-1 border border-border rounded hover:bg-muted" disabled>
+            </Link>
+            <Link
+              href={`/leads?q=${query}&status=${statusFilter}&page=${currentPage + 1}`}
+              className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}`}
+            >
               Next
-            </button>
+            </Link>
           </div>
         </div>
       </div>

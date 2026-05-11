@@ -92,7 +92,15 @@
 - Wired the `/leads/[id]` detail view to render the timeline dynamically using the newly scaffolded `Activity` model in Prisma.
 
 ## [0.21.0] - Upstream Workflow Synchronization
+
 - Executed strict recursive merge of `origin/main` upstream features (Offer Draft and Listing Entry workflows) with local `main` branch.
 - Successfully resolved all TypeScript collisions resulting from workflow scaffolding overlapping with core CRM `useSearchParams` filtering.
 - Prevented schema divergence related to `Task` due dates to guarantee build stability alongside upstream UI additions.
 - Verified stable production compile.
+
+## [0.22.0] - Task Assignments, Due Dates, and Lead Pagination
+
+- Safely solved ambiguous relation schema collisions by using named relations (`@relation("TaskAssignee")`) for `Task.assignedTo`.
+- Updated `Task` Prisma model and Zod schemas to support `dueDate` and `assignedToId`.
+- Updated `AddTaskModal` UI and the backend Server Action to capture, validate, and store Task deadlines and assignments.
+- Implemented `take`/`skip` server-side pagination on the Leads list view using Next.js `searchParams`.

@@ -22,7 +22,7 @@
 - [x] **UI Polish:** Add comprehensive UI loading states and Toast notifications for form submissions.
 - [x] **Feature Expansion:** Add filtering, sorting, and pagination across all data tables (Leads, Contacts, Tasks) using `useSearchParams`.
 - [x] **Feature Expansion:** Activity timelines for entities (record when status changes). Scaffold the `Activity` Prisma model.
-- [ ] **Feature Expansion:** Task deadlines and assignment (`dueDate`, `assignedToId`).
+- [x] **Feature Expansion:** Task deadlines and assignment (`dueDate`, `assignedToId`).
 
 ## Known Bugs / Tech Debt
 

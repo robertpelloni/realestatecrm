@@ -10,6 +10,8 @@ async function addTask(formData: FormData) {
     description: formData.get('description'),
     status: formData.get('status'),
     workspaceId: formData.get('workspaceId'),
+    dueDate: formData.get('dueDate'),
+    assignedToId: formData.get('assignedToId'),
   };
 
   const validatedData = taskSchema.safeParse(rawData);
@@ -18,7 +20,7 @@ async function addTask(formData: FormData) {
     return { error: validatedData.error.issues[0].message };
   }
 
-  const { title, description, status, workspaceId } = validatedData.data;
+  const { title, description, status, workspaceId, dueDate, assignedToId } = validatedData.data;
 
   try {
     await prisma.task.create({
@@ -27,6 +29,8 @@ async function addTask(formData: FormData) {
         description: description || null,
         status,
         workspaceId,
+        dueDate: dueDate ? new Date(dueDate) : null,
+        assignedToId: assignedToId || null,
       },
     });
   } catch (error) {
@@ -54,12 +58,16 @@ export default async function TasksPage(props: {
 
   const tasks = await prisma.task.findMany({
     where: whereClause,
+    include: {
+      assignedTo: true,
+    },
     orderBy: {
       createdAt: 'desc',
     },
   });
 
   const workspaces = await prisma.workspace.findMany();
+  const users = await prisma.user.findMany({ select: { id: true, name: true } });
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -69,7 +77,7 @@ export default async function TasksPage(props: {
           <p className="text-muted-foreground">Manage your daily to-dos and action items.</p>
         </div>
         <div className="flex gap-2">
-          <AddTaskModal addTaskAction={addTask} workspaces={workspaces} />
+          <AddTaskModal addTaskAction={addTask} workspaces={workspaces} users={users} />
         </div>
       </div>
 
@@ -106,8 +114,9 @@ export default async function TasksPage(props: {
             <thead className="text-xs text-muted-foreground uppercase bg-muted/30">
               <tr>
                 <th className="px-6 py-3 font-medium">Task</th>
+                <th className="px-6 py-3 font-medium">Assignee</th>
+                <th className="px-6 py-3 font-medium">Due Date</th>
                 <th className="px-6 py-3 font-medium">Status</th>
-                <th className="px-6 py-3 font-medium">Created</th>
                 <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
@@ -122,6 +131,12 @@ export default async function TasksPage(props: {
                       </div>
                     )}
                   </td>
+                  <td className="px-6 py-4 text-muted-foreground">
+                    {task.assignedTo ? task.assignedTo.name || task.assignedTo.email : '--'}
+                  </td>
+                  <td className="px-6 py-4 text-muted-foreground">
+                    {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '--'}
+                  </td>
                   <td className="px-6 py-4">
                     <span
                       className={`px-2 py-1 text-xs rounded-full font-medium border ${
@@ -135,9 +150,6 @@ export default async function TasksPage(props: {
                       {task.status.replace('_', ' ')}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground">
-                    {new Date(task.createdAt).toLocaleDateString()}
-                  </td>
                   <td className="px-6 py-4 text-right flex justify-end gap-3">
                     <button className="text-muted-foreground hover:text-foreground transition-colors">
                       Complete
@@ -150,7 +162,7 @@ export default async function TasksPage(props: {
               ))}
               {tasks.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
                     No tasks found.
                   </td>
                 </tr>
