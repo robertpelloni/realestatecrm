@@ -2,6 +2,7 @@
 
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { workflowSessionSchema } from '@/lib/validations/workflow';
 
 export async function saveWorkflowSession(
   workspaceId: string,
@@ -11,26 +12,42 @@ export async function saveWorkflowSession(
   leadId?: string,
   dealId?: string,
 ) {
+  const rawData = {
+    workspaceId,
+    type,
+    data,
+    existingSessionId: existingSessionId || undefined,
+    leadId: leadId || undefined,
+    dealId: dealId || undefined,
+  };
+
+  const validatedData = workflowSessionSchema.safeParse(rawData);
+
+  if (!validatedData.success) {
+    return { error: validatedData.error.issues[0].message };
+  }
+
+  const payload = validatedData.data;
+
   try {
-    if (existingSessionId) {
+    if (payload.existingSessionId) {
       await prisma.workflowSession.update({
-        where: { id: existingSessionId },
+        where: { id: payload.existingSessionId },
         data: {
-          data,
+          data: payload.data,
           status: 'DRAFT',
-          updatedAt: new Date(),
         },
       });
-      return { success: true, id: existingSessionId };
+      return { success: true, id: payload.existingSessionId };
     } else {
       const session = await prisma.workflowSession.create({
         data: {
-          workspaceId,
-          type,
-          data,
+          workspaceId: payload.workspaceId,
+          type: payload.type,
+          data: payload.data,
           status: 'DRAFT',
-          leadId: leadId || null,
-          dealId: dealId || null,
+          leadId: payload.leadId || null,
+          dealId: payload.dealId || null,
         },
       });
       return { success: true, id: session.id };
@@ -42,12 +59,12 @@ export async function saveWorkflowSession(
 }
 
 export async function submitWorkflowSession(sessionId: string) {
+  if (!sessionId) return { error: 'Session ID required' };
   try {
     await prisma.workflowSession.update({
       where: { id: sessionId },
       data: {
         status: 'SUBMITTED',
-        updatedAt: new Date(),
       },
     });
     return { success: true };

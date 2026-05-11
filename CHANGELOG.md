@@ -117,3 +117,10 @@
 - Removed local-storage mock handlers in upstream `WorkflowStudio` components.
 - Introduced `src/lib/actions/workflow.ts` (Next.js Server Actions) to save and submit JSON workflow payloads directly to the SQLite backend.
 - Converted aggregate dashboard metrics into deep-links (e.g., clicking "Tasks Due" pushes the user to `/tasks?status=TODO`).
+
+## [0.25.0] - Phase 2 Workflow DB Hookups
+
+- Built `src/lib/validations/workflow.ts` schema to enforce strict checking of workflow JSON payloads.
+- Converted `/workflows/offer-draft` and `/workflows/listing-entry` to dynamic Server Components that parse `?sessionId` from the URL.
+- These workflow pages now fetch existing `WorkflowSession` records from Prisma and inject their parsed JSON histories into `WorkflowStudio` components.
+- The `WorkflowStudio` interactive shell is now a true persistent interface connected to the SQLite backend.

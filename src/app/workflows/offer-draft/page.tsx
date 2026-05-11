@@ -1,154 +1,104 @@
 import prisma from '@/lib/prisma';
 import { WorkflowStudio } from '@/components/workflows/workflow-studio';
+import { notFound } from 'next/navigation';
 
-const offerDefaultValues = {
-  buyerName: 'Jordan Smith',
-  propertyAddress: '412 Lakeview Dr',
-  offerPrice: '385000',
-  earnestMoney: '10000',
-  closingDate: '2026-06-30',
-  financingType: 'Conventional',
-  contingencies: 'Inspection, appraisal, financing',
-  inclusions: 'Refrigerator, range, washer, dryer',
-  agentNotes: 'Use recent comparable sales to support the price band.',
-};
+export default async function OfferDraftPage(props: {
+  searchParams?: Promise<{ sessionId?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const sessionId = searchParams?.sessionId;
 
-export default async function OfferDraftPage() {
   const workspaces = await prisma.workspace.findMany();
   const wsId = workspaces[0]?.id || 'mock-ws';
+
+  let initialSeed = [];
+
+  if (sessionId) {
+    const session = await prisma.workflowSession.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session) {
+      notFound();
+    }
+
+    if (session.data) {
+      // We parse the stored JSON snapshot and extract the activity seed/history to populate the UI.
+      try {
+        const parsed = JSON.parse(session.data);
+        if (parsed.history) {
+          initialSeed = parsed.history;
+        }
+      } catch (e) {
+        console.error('Failed to parse workflow session data', e);
+      }
+    }
+  }
+
   return (
     <WorkflowStudio
       eyebrow="Offer workflow map"
       title="Offer Draft Screen"
       routeLabel="/workflows/offer-draft"
-      subtitle="Interactive offer drafting with editable form state, backend draft persistence, mock CRM data, validation checks, and mobile-safe action controls."
+      subtitle="Assemble the required documents and pricing strategy to generate an offer for review."
       workflowId="offer-draft"
-      storageKey="workflow-offer-draft"
+      storageKey="offer-draft"
       workspaceId={wsId}
+      existingSessionId={sessionId}
+      activitySeed={initialSeed}
       summaryItems={[
-        { label: 'Buyer', value: 'Jordan Smith', source: 'CRM' },
-        { label: 'Property', value: '412 Lakeview Dr', source: 'MLS' },
-        { label: 'Deal stage', value: 'Offer drafting', source: 'Workflow' },
-        {
-          label: 'Source provenance',
-          value: 'MiRealSource + Realist',
-          source: 'Tracked',
-          accent: true,
-        },
+        { label: 'Property', value: '123 Pine St, Detroit, MI', source: 'MLS' },
+        { label: 'Buyer', value: 'John Doe', source: 'CRM' },
+        { label: 'Target close', value: '30 days', source: 'Manual' },
+        { label: 'Estimated offer', value: '$450,000', source: 'Comp Engine', accent: true },
       ]}
-      sections={[
-        {
-          title: 'Core offer details',
-          description:
-            'Edit the record with the offer terms that should flow into the package and CRM timeline.',
-          fields: [
-            { key: 'buyerName', label: 'Buyer name', type: 'text', required: true, source: 'CRM' },
-            {
-              key: 'propertyAddress',
-              label: 'Property address',
-              type: 'text',
-              required: true,
-              source: 'MLS',
-            },
-            {
-              key: 'offerPrice',
-              label: 'Offer price',
-              type: 'number',
-              required: true,
-              source: 'Draft',
-            },
-            { key: 'earnestMoney', label: 'Earnest money', type: 'number', source: 'Draft' },
-          ],
-        },
-        {
-          title: 'Terms and supporting context',
-          description:
-            'Capture the conditions, timeline, and notes that help the broker review the offer quickly.',
-          fields: [
-            {
-              key: 'closingDate',
-              label: 'Target closing date',
-              type: 'date',
-              required: true,
-              source: 'Calendar',
-            },
-            {
-              key: 'financingType',
-              label: 'Financing type',
-              type: 'select',
-              required: true,
-              options: ['Conventional', 'FHA', 'VA', 'Cash', 'USDA', 'Other'],
-              source: 'Buyer',
-            },
-            {
-              key: 'contingencies',
-              label: 'Contingencies',
-              type: 'textarea',
-              placeholder: 'Inspection, appraisal, financing...',
-              source: 'Agent',
-            },
-            {
-              key: 'inclusions',
-              label: 'Inclusions / exclusions',
-              type: 'textarea',
-              placeholder: 'What stays with the property?',
-              source: 'MLS',
-            },
-            {
-              key: 'agentNotes',
-              label: 'Comparable notes / agent notes',
-              type: 'textarea',
-              placeholder: 'Add supporting notes for pricing or strategy...',
-              source: 'Agent',
-            },
-          ],
-        },
-      ]}
-      rightSections={[
-        {
-          title: 'Compliance rail',
-          items: [
-            'Missing field checks',
-            'Stale data alerts',
-            'Human approval gate',
-            'Audit log retention',
-          ],
-        },
-        {
-          title: 'Completion state',
-          items: ['Version saved to deal timeline', 'Docs linked to CRM', 'Reminder tasks created'],
-        },
-      ]}
-      validationTitle="Offer validation"
+      validationTitle="Offer readiness"
       validationNotes={[
-        'Source labels remain visible beside imported values so the agent knows what came from approved data.',
-        'The workflow blocks signature sending until required fields are complete.',
-        'Save Draft writes the current package to local storage first so the mobile experience stays reliable.',
+        'Missing proof of funds document.',
+        'Earnest money deposit amount not specified.',
+        'Inspection contingency terms pending.',
+      ]}
+      provenanceTitle="Data sources"
+      provenanceNotes={[
+        'Property data imported from Realcomp (2 hrs ago).',
+        'Buyer info synced from CRM.',
+        'Tax records matched via BS&A.',
       ]}
       mobileNotes={[
-        'Use sticky buttons and a one-thumb action zone at the bottom of the screen.',
-        'Collapse the form into cards on smaller displays so the agent can move quickly section by section.',
-        'Keep the validation panel above the action bar on mobile so blockers are seen before send.',
-        'Queue unsaved edits locally so the draft survives backgrounding or weak service.',
+        'Switch to desktop for full document assembly.',
+        'Review the generated PDF carefully before sending.',
       ]}
-      provenanceTitle="Source provenance"
-      provenanceNotes={[
-        'Mock CRM data is seeded from the current draft so the screen feels live even before backend wiring.',
-        'MLS / Realist / BS&A / Realcomp sources are represented as labeled context, not final submission authority.',
-        'A saved local draft preserves the current state for later CRM sync or external handoff.',
-      ]}
-      defaultValues={offerDefaultValues}
-      activitySeed={[
+      defaultValues={{
+        offer_amount: '450000',
+        earnest_money: '10000',
+        contingency_days: '10',
+        close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        seller_concessions: '0',
+      }}
+      sections={[
         {
-          title: 'Loaded draft shell',
-          detail: 'Open offer workflow loaded with mock CRM and source context.',
-          timestamp: 'Now',
+          title: 'Pricing & Terms',
+          description: 'Set the main financial parameters for the offer.',
+          fields: [
+            { key: 'offer_amount', type: 'number', label: 'Offer Amount ($)' },
+            { key: 'earnest_money', type: 'number', label: 'Earnest Money ($)' },
+            { key: 'seller_concessions', type: 'number', label: 'Seller Concessions ($)' },
+          ],
         },
         {
-          title: 'Review gate ready',
-          detail: 'Broker/team lead approval can be requested from this screen.',
-          timestamp: 'Earlier',
+          title: 'Contingencies',
+          description: 'Define the necessary inspection and closing timelines.',
+          fields: [
+            { key: 'contingency_days', type: 'number', label: 'Inspection Days' },
+            { key: 'close_date', type: 'date', label: 'Target Close Date' },
+          ],
         },
+      ]}
+      actions={[
+        { id: 'save', label: 'Save Draft', tone: 'secondary' },
+        { id: 'validate', label: 'Check Readiness', tone: 'ghost' },
+        { id: 'docs', label: 'Generate PDF', tone: 'ghost' },
+        { id: 'submit', label: 'Send for Review', tone: 'primary' },
       ]}
     />
   );

@@ -1,178 +1,96 @@
 import prisma from '@/lib/prisma';
 import { WorkflowStudio } from '@/components/workflows/workflow-studio';
+import { notFound } from 'next/navigation';
 
-const listingDefaultValues = {
-  sellerName: 'Taylor Johnson',
-  propertyAddress: '412 Lakeview Dr',
-  listingPrice: '399000',
-  beds: '4',
-  baths: '2.5',
-  squareFeet: '2410',
-  lotSize: '0.28',
-  propertyType: 'Single Family',
-  status: 'Draft',
-  remarks: 'Bright kitchen, updated flooring, and a private backyard.',
-  showingInstructions: 'Lockbox on side door; schedule 24 hours ahead.',
-};
+export default async function ListingEntryPage(props: {
+  searchParams?: Promise<{ sessionId?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const sessionId = searchParams?.sessionId;
 
-export default async function ListingEntryPage() {
   const workspaces = await prisma.workspace.findMany();
   const wsId = workspaces[0]?.id || 'mock-ws';
+
+  let initialSeed = [];
+
+  if (sessionId) {
+    const session = await prisma.workflowSession.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session) {
+      notFound();
+    }
+
+    if (session.data) {
+      try {
+        const parsed = JSON.parse(session.data);
+        if (parsed.history) {
+          initialSeed = parsed.history;
+        }
+      } catch (e) {
+        console.error('Failed to parse workflow session data', e);
+      }
+    }
+  }
+
   return (
     <WorkflowStudio
       eyebrow="Listing workflow map"
       title="Listing Entry Screen"
       routeLabel="/workflows/listing-entry"
-      subtitle="Interactive listing entry with editable property data, backend draft persistence, mock CRM records, validation, and mobile-first controls."
+      subtitle="Gather and verify the required property details and media before publishing to the MLS."
       workflowId="listing-entry"
-      storageKey="workflow-listing-entry"
+      storageKey="listing-entry"
       workspaceId={wsId}
+      existingSessionId={sessionId}
+      activitySeed={initialSeed}
       summaryItems={[
-        { label: 'Seller', value: 'Taylor Johnson', source: 'CRM' },
-        { label: 'Listing', value: '412 Lakeview Dr', source: 'Approved source' },
-        { label: 'Agreement', value: 'Signed and active', source: 'Docs' },
-        {
-          label: 'Source provenance',
-          value: 'MLS + BS&A + Realcomp',
-          source: 'Tracked',
-          accent: true,
-        },
+        { label: 'Property', value: '456 Oak Ln, Royal Oak, MI', source: 'Manual' },
+        { label: 'Owner', value: 'Jane Smith', source: 'CRM' },
+        { label: 'List Price', value: '$320,000', source: 'CMA Draft', accent: true },
+        { label: 'Status', value: 'Draft', source: 'System' },
       ]}
+      validationTitle="Listing readiness"
+      validationNotes={[
+        'Missing primary exterior photo.',
+        'Square footage field is empty.',
+        'Seller disclosure form not signed.',
+      ]}
+      provenanceTitle="Data sources"
+      provenanceNotes={['Public records imported via BS&A.', 'Owner info synced from CRM.']}
+      mobileNotes={[
+        'Use the mobile app to quickly upload photos.',
+        'Switch to desktop for detailed form entry.',
+      ]}
+      defaultValues={{
+        list_price: '320000',
+        bedrooms: '3',
+        bathrooms: '2',
+        sqft: '',
+      }}
       sections={[
         {
-          title: 'Property and pricing',
-          description:
-            'Prefill the core property record and keep the values visible while the agent edits the listing.',
+          title: 'Basic Property Details',
+          description: 'Define the primary attributes of the listing.',
           fields: [
-            {
-              key: 'sellerName',
-              label: 'Seller name',
-              type: 'text',
-              required: true,
-              source: 'CRM',
-            },
-            {
-              key: 'propertyAddress',
-              label: 'Property address',
-              type: 'text',
-              required: true,
-              source: 'MLS',
-            },
-            {
-              key: 'listingPrice',
-              label: 'List price',
-              type: 'number',
-              required: true,
-              source: 'Draft',
-            },
-            {
-              key: 'propertyType',
-              label: 'Property type',
-              type: 'select',
-              required: true,
-              options: [
-                'Single Family',
-                'Condo',
-                'Townhouse',
-                'Multi-Family',
-                'Land',
-                'Commercial',
-              ],
-              source: 'MLS',
-            },
-            {
-              key: 'beds',
-              label: 'Beds',
-              type: 'number',
-              required: true,
-              source: 'Approved source',
-            },
-            {
-              key: 'baths',
-              label: 'Baths',
-              type: 'number',
-              required: true,
-              source: 'Approved source',
-            },
-            {
-              key: 'squareFeet',
-              label: 'Square feet',
-              type: 'number',
-              required: true,
-              source: 'Approved source',
-            },
-            { key: 'lotSize', label: 'Lot size (acres)', type: 'number', source: 'Parcel' },
-            {
-              key: 'status',
-              label: 'Listing status',
-              type: 'select',
-              required: true,
-              options: ['Draft', 'Coming Soon', 'Active', 'Pending', 'Sold'],
-              source: 'Workflow',
-            },
+            { key: 'list_price', type: 'number', label: 'List Price ($)' },
+            { key: 'bedrooms', type: 'number', label: 'Bedrooms' },
+            { key: 'bathrooms', type: 'number', label: 'Bathrooms' },
+            { key: 'sqft', type: 'number', label: 'Square Footage' },
           ],
         },
         {
-          title: 'Remarks and showing prep',
-          description:
-            'Keep the description, media expectations, and showing notes in one visible editing area.',
-          fields: [
-            {
-              key: 'remarks',
-              label: 'Public remarks',
-              type: 'textarea',
-              required: true,
-              placeholder: 'Write an appealing listing summary...',
-              source: 'Agent',
-            },
-            {
-              key: 'showingInstructions',
-              label: 'Showing instructions',
-              type: 'textarea',
-              placeholder: 'Add lockbox, notice, and access instructions...',
-              source: 'Agent',
-            },
-          ],
+          title: 'Description',
+          description: 'Provide the public-facing marketing remarks.',
+          fields: [{ key: 'public_remarks', type: 'textarea', label: 'Public Remarks' }],
         },
       ]}
       actions={[
-        { id: 'save', label: 'Save Draft', tone: 'ghost' },
-        { id: 'media', label: 'Upload Photos', tone: 'ghost' },
-        { id: 'docs', label: 'Attach Documents', tone: 'ghost' },
-        { id: 'preview', label: 'Preview Listing', tone: 'secondary' },
-        { id: 'submit', label: 'Submit to MLS', tone: 'primary' },
-      ]}
-      validationTitle="Listing validation"
-      validationNotes={[
-        'Missing or conflicting fields are surfaced in the same screen so they can be fixed before submission.',
-        'Source provenance stays visible next to the property data to support review and compliance.',
-        'Save Draft stores the form locally so the mobile app can recover after backgrounding or disconnects.',
-      ]}
-      mobileNotes={[
-        'Keep Save Draft and Submit to MLS pinned to the bottom for easy one-hand use.',
-        'Put uploads in a dedicated drawer so the agent can add media without leaving the listing flow.',
-        'Show the validation rail before publish so blockers are obvious on smaller screens.',
-        'Persist the form offline and retry sync automatically when the device reconnects.',
-      ]}
-      provenanceTitle="Source provenance"
-      provenanceNotes={[
-        'The screen accepts labeled mock data for MLS, BS&A, and Realcomp as draft-only context.',
-        'Historical and licensed property facts should remain clearly separated from final published data.',
-        'Every save creates a durable local snapshot until backend persistence is wired in.',
-      ]}
-      defaultValues={listingDefaultValues}
-      activitySeed={[
-        {
-          title: 'Loaded listing shell',
-          detail:
-            'Interactive listing workflow opened with mock property data and source provenance.',
-          timestamp: 'Now',
-        },
-        {
-          title: 'Validation rail ready',
-          detail: 'The screen is waiting for the agent to review or publish the draft listing.',
-          timestamp: 'Earlier',
-        },
+        { id: 'save', label: 'Save Draft', tone: 'secondary' },
+        { id: 'validate', label: 'Check Errors', tone: 'ghost' },
+        { id: 'media', label: 'Manage Photos', tone: 'ghost' },
+        { id: 'submit', label: 'Publish to MLS', tone: 'primary' },
       ]}
     />
   );
