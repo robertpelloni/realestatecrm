@@ -1,49 +1,85 @@
-import { WorkflowScreen } from '@/components/workflows/workflow-screen';
+import { WorkflowStudio } from '@/components/workflows/workflow-studio';
 
-const offerWireframe = [
-  'Header: back, property title, save state, status, export | Left rail: buyer, agent, stage, source badges | Center: offer form | Right rail: property facts, comps, warnings | Footer: save, review, send',
-  'Header actions: Create Offer, Generate Package, Request Review, Send for Signature | Form sections: buyer, terms, contingencies, timeline, notes | Approval state: broker approval, compliance review, audit log',
-  'Mobile adaptation: sticky action bar, collapsible sections, warning cards, offline draft queue | CRM writeback: timeline, reminders, linked docs',
-];
+const offerDefaultValues = {
+  buyerName: 'Jordan Smith',
+  propertyAddress: '412 Lakeview Dr',
+  offerPrice: '385000',
+  earnestMoney: '10000',
+  closingDate: '2026-06-30',
+  financingType: 'Conventional',
+  contingencies: 'Inspection, appraisal, financing',
+  inclusions: 'Refrigerator, range, washer, dryer',
+  agentNotes: 'Use recent comparable sales to support the price band.',
+};
 
 export default function OfferDraftPage() {
   return (
-    <WorkflowScreen
+    <WorkflowStudio
       eyebrow="Offer workflow map"
       title="Offer Draft Screen"
       routeLabel="/workflows/offer-draft"
-      subtitle="A wireframe-level offer workspace for drafting, reviewing, approving, and sending offers while keeping source provenance and CRM writeback visible at every step."
-      topActions={[
-        { label: 'Save Draft', href: '#', tone: 'ghost' },
-        { label: 'Request Review', href: '#', tone: 'secondary' },
-        { label: 'Send for Signature', href: '#', tone: 'primary' },
-      ]}
-      leftSummaryTitle="Offer context"
-      leftSummary={[
+      subtitle="Interactive offer drafting with editable form state, backend draft persistence, mock CRM data, validation checks, and mobile-safe action controls."
+      workflowId="offer-draft"
+      storageKey="workflow-offer-draft"
+      summaryItems={[
         { label: 'Buyer', value: 'Jordan Smith', source: 'CRM' },
         { label: 'Property', value: '412 Lakeview Dr', source: 'MLS' },
         { label: 'Deal stage', value: 'Offer drafting', source: 'Workflow' },
-        { label: 'Source provenance', value: 'MiRealSource + Realist', source: 'Tracked' },
+        { label: 'Source provenance', value: 'MiRealSource + Realist', source: 'Tracked', accent: true },
       ]}
-      centerSections={[
+      sections={[
         {
-          title: 'Draft sections',
-          items: [
-            'Buyer and seller identity',
-            'Offer price, earnest money, deadlines',
-            'Contingencies, financing, inclusions/exclusions',
-            'Comparable notes and agent comments',
+          title: 'Core offer details',
+          description:
+            'Edit the record with the offer terms that should flow into the package and CRM timeline.',
+          fields: [
+            { key: 'buyerName', label: 'Buyer name', type: 'text', required: true, source: 'CRM' },
+            { key: 'propertyAddress', label: 'Property address', type: 'text', required: true, source: 'MLS' },
+            { key: 'offerPrice', label: 'Offer price', type: 'number', required: true, source: 'Draft' },
+            { key: 'earnestMoney', label: 'Earnest money', type: 'number', source: 'Draft' },
           ],
         },
         {
-          title: 'Primary screen buttons',
-          items: [
-            'Save Draft',
-            'Generate Package',
-            'Request Review',
-            'Send for Signature',
-            'Add Comparable Note',
-            'Add Workflow Step',
+          title: 'Terms and supporting context',
+          description:
+            'Capture the conditions, timeline, and notes that help the broker review the offer quickly.',
+          fields: [
+            {
+              key: 'closingDate',
+              label: 'Target closing date',
+              type: 'date',
+              required: true,
+              source: 'Calendar',
+            },
+            {
+              key: 'financingType',
+              label: 'Financing type',
+              type: 'select',
+              required: true,
+              options: ['Conventional', 'FHA', 'VA', 'Cash', 'USDA', 'Other'],
+              source: 'Buyer',
+            },
+            {
+              key: 'contingencies',
+              label: 'Contingencies',
+              type: 'textarea',
+              placeholder: 'Inspection, appraisal, financing...',
+              source: 'Agent',
+            },
+            {
+              key: 'inclusions',
+              label: 'Inclusions / exclusions',
+              type: 'textarea',
+              placeholder: 'What stays with the property?',
+              source: 'MLS',
+            },
+            {
+              key: 'agentNotes',
+              label: 'Comparable notes / agent notes',
+              type: 'textarea',
+              placeholder: 'Add supporting notes for pricing or strategy...',
+              source: 'Agent',
+            },
           ],
         },
       ]}
@@ -62,21 +98,37 @@ export default function OfferDraftPage() {
           items: ['Version saved to deal timeline', 'Docs linked to CRM', 'Reminder tasks created'],
         },
       ]}
-      bottomActions={[
-        { label: 'Save Draft', href: '#', tone: 'ghost' },
-        { label: 'Attach Supporting Docs', href: '#', tone: 'ghost' },
-        { label: 'Generate Package', href: '#', tone: 'secondary' },
-        { label: 'Request Review', href: '#', tone: 'secondary' },
-        { label: 'Send for Signature', href: '#', tone: 'primary' },
+      validationTitle="Offer validation"
+      validationNotes={[
+        'Source labels remain visible beside imported values so the agent knows what came from approved data.',
+        'The workflow blocks signature sending until required fields are complete.',
+        'Save Draft writes the current package to local storage first so the mobile experience stays reliable.',
       ]}
-      wireframeMap={offerWireframe}
       mobileNotes={[
-        'Use one-thumb-first controls with the send button pinned to the bottom.',
-        'Collapse buyer, property, and terms into cards that expand one at a time.',
-        'Show compliance warnings as full-width alerts before Send for Signature.',
-        'Keep offline drafts queued until the device reconnects.',
+        'Use sticky buttons and a one-thumb action zone at the bottom of the screen.',
+        'Collapse the form into cards on smaller displays so the agent can move quickly section by section.',
+        'Keep the validation panel above the action bar on mobile so blockers are seen before send.',
+        'Queue unsaved edits locally so the draft survives backgrounding or weak service.',
       ]}
-      footerNote="This screen is intentionally a visual shell first, so it can later connect to live offer generation, e-signature, and MLS handoff services."
+      provenanceTitle="Source provenance"
+      provenanceNotes={[
+        'Mock CRM data is seeded from the current draft so the screen feels live even before backend wiring.',
+        'MLS / Realist / BS&A / Realcomp sources are represented as labeled context, not final submission authority.',
+        'A saved local draft preserves the current state for later CRM sync or external handoff.',
+      ]}
+      defaultValues={offerDefaultValues}
+      activitySeed={[
+        {
+          title: 'Loaded draft shell',
+          detail: 'Open offer workflow loaded with mock CRM and source context.',
+          timestamp: 'Now',
+        },
+        {
+          title: 'Review gate ready',
+          detail: 'Broker/team lead approval can be requested from this screen.',
+          timestamp: 'Earlier',
+        },
+      ]}
     />
   );
 }

@@ -90,3 +90,9 @@
 - Built the `AddActivityForm` component, allowing users to log notes on a Lead record.
 - Added `activitySchema` in Zod to validate activity additions.
 - Wired the `/leads/[id]` detail view to render the timeline dynamically using the newly scaffolded `Activity` model in Prisma.
+
+## [0.21.0] - Upstream Workflow Synchronization
+- Executed strict recursive merge of `origin/main` upstream features (Offer Draft and Listing Entry workflows) with local `main` branch.
+- Successfully resolved all TypeScript collisions resulting from workflow scaffolding overlapping with core CRM `useSearchParams` filtering.
+- Prevented schema divergence related to `Task` due dates to guarantee build stability alongside upstream UI additions.
+- Verified stable production compile.
