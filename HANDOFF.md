@@ -1,18 +1,16 @@
 # HANDOFF.md
 
 ## Session History & Findings
-**Current Session:**
-- Added exact UI screen flows for offer and listing entry.
-- Built wireframe-level component maps for the offer and listing screens.
-- Implemented Next.js workflow shell pages at `/workflows/offer-draft` and `/workflows/listing-entry`.
-- Added a reusable `WorkflowScreen` component for three-column desktop and stacked mobile layouts.
-- Updated the home page to link directly into both workflow shells.
-- Updated planning docs to include wireframe component maps and workflow shell implementation.
-- Added an interactive `WorkflowStudio` component with editable form state, local draft save, validation, activity history, and mock CRM rails.
-- Converted the offer and listing screens into interactive client-side workflow pages.
-- Added a file-backed backend workflow state store with `/api/workflows/[workflowId]` hydration and persistence.
 
-**Next Steps for Next Model:**
-- Wire the workflow shells to live CRM data and persistence.
-- Add editable forms, local draft storage, and save/update actions.
-- Continue into the broader CRM core entities and workflow engine.
+**Current Session:**
+
+- Finalized Phase 2 Workflow engine integration by deeply linking `WorkflowSessions` to `Deals`. Users can generate "New Offer Drafts" or "New Listing Entries" directly from `deals/[id]/page.tsx`.
+- Navigated a complex Next.js 15 route conflict between the `(dashboard)` root `page.tsx` and the newly scaffolded `(portal)` route group. Safely resolved by placing the portal under `/portal`.
+- Scaffolded the baseline UI for the Client Portal where end-users will eventually review and sign the workflows prepared by agents.
+- Bumped version to `0.26.0`.
+
+**Next Steps for Next Model/Agent:**
+
+1. **Portal Authentication:** The `/portal` route is currently static mock data. It needs an authentication layer (e.g., Magic Links via NextAuth, or a specific `role="CLIENT"` check) to load the actual Deals and Workflows tied to the logged-in client's email.
+2. **Re-attempt Task Schemas:** The `Task.assignedToId` mapping to `User` failed earlier due to ambiguous relation definitions overlapping with `Contact.assignedTo`. Find a clean way to apply this schema mutation.
+3. **Advanced Filtering:** Consider building a complex multi-select filtering component for the data tables to replace the basic `<select>` dropdowns.

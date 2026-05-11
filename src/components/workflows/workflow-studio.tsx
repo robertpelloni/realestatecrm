@@ -1,6 +1,8 @@
-"use client";
+'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import { saveWorkflowSession, submitWorkflowSession } from '@/lib/actions/workflow';
 
 import {
   createEmptyWorkflowSnapshot,
@@ -60,14 +62,17 @@ type WorkflowStudioProps = {
   routeLabel: string;
   workflowId: string;
   storageKey: string;
+  workspaceId: string;
+  existingSessionId?: string;
   summaryItems: SummaryItem[];
   sections: WorkflowSection[];
-  actions: WorkflowAction[];
-  validationTitle: string;
-  validationNotes: string[];
-  mobileNotes: string[];
-  provenanceTitle: string;
-  provenanceNotes: string[];
+  actions?: WorkflowAction[];
+  validationTitle?: string;
+  validationNotes?: string[];
+  mobileNotes?: string[];
+  provenanceTitle?: string;
+  provenanceNotes?: string[];
+  rightSections?: { title: string; items: string[] }[];
   defaultValues: Record<string, string>;
   activitySeed: WorkflowActivityEntry[];
 };
@@ -170,7 +175,11 @@ function FieldEditor({
           onChange={(event) => onChange(event.target.value)}
         />
       ) : field.type === 'select' ? (
-        <select className={baseClass} value={value} onChange={(event) => onChange(event.target.value)}>
+        <select
+          className={baseClass}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        >
           <option value="">Select one</option>
           {field.options?.map((option) => (
             <option key={option} value={option}>
@@ -187,7 +196,9 @@ function FieldEditor({
           onChange={(event) => onChange(event.target.value)}
         />
       )}
-      {field.helper ? <p className="text-xs leading-5 text-muted-foreground">{field.helper}</p> : null}
+      {field.helper ? (
+        <p className="text-xs leading-5 text-muted-foreground">{field.helper}</p>
+      ) : null}
     </label>
   );
 }
@@ -196,7 +207,10 @@ function ActivityFeed({ activity }: { activity: WorkflowActivityEntry[] }) {
   return (
     <div className="space-y-3">
       {activity.map((entry) => (
-        <div key={`${entry.timestamp}-${entry.title}`} className="rounded-xl border border-border bg-muted/20 p-3">
+        <div
+          key={`${entry.timestamp}-${entry.title}`}
+          className="rounded-xl border border-border bg-muted/20 p-3"
+        >
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-foreground">{entry.title}</p>
@@ -235,6 +249,8 @@ export function WorkflowStudio({
   routeLabel,
   workflowId,
   storageKey,
+  workspaceId,
+  existingSessionId,
   summaryItems,
   sections,
   actions,
@@ -251,7 +267,9 @@ export function WorkflowStudio({
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [banner, setBanner] = useState(emptySnapshot.banner);
-  const [connectionState, setConnectionState] = useState<'loading' | 'backend' | 'local' | 'empty'>('loading');
+  const [connectionState, setConnectionState] = useState<'loading' | 'backend' | 'local' | 'empty'>(
+    'loading',
+  );
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'fallback'>('idle');
   const [hydrated, setHydrated] = useState(false);
 
@@ -357,10 +375,7 @@ export function WorkflowStudio({
     setActivity((current) => [entry, ...current].slice(0, 8));
   }
 
-  async function persistSnapshot(options: {
-    note: string;
-    entry: WorkflowActivityEntry;
-  }) {
+  async function persistSnapshot(options: { note: string; entry: WorkflowActivityEntry }) {
     clearAutosaveTimer();
     const saveId = ++saveSequenceRef.current;
     const nextActivity = [options.entry, ...activity].slice(0, 8);
@@ -440,6 +455,14 @@ export function WorkflowStudio({
           timestamp: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
         },
       });
+
+      const payload = JSON.stringify(draft);
+      const res = await saveWorkflowSession(workspaceId, workflowId, payload, existingSessionId);
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success('Workflow draft saved!');
+      }
       return;
     }
 
@@ -581,8 +604,12 @@ export function WorkflowStudio({
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              {actions.map((action) => (
-                <ActionButton key={action.id} action={action} onClick={() => void handleAction(action.id)} />
+              {actions?.map((action) => (
+                <ActionButton
+                  key={action.id}
+                  action={action}
+                  onClick={() => void handleAction(action.id)}
+                />
               ))}
             </div>
           </div>
@@ -630,11 +657,17 @@ export function WorkflowStudio({
             <section className="rounded-3xl border border-border bg-background p-5 shadow-sm">
               <div className="grid gap-4 md:grid-cols-2">
                 {sections.map((section) => (
-                  <div key={section.title} className="space-y-4 rounded-2xl border border-border bg-muted/10 p-4">
+                  <div
+                    key={section.title}
+                    className="space-y-4 rounded-2xl border border-border bg-muted/10 p-4"
+                  >
                     <SectionHeader title={section.title} description={section.description} />
                     <div className="grid gap-4 md:grid-cols-2">
                       {section.fields.map((field) => (
-                        <div key={field.key} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>
+                        <div
+                          key={field.key}
+                          className={field.type === 'textarea' ? 'md:col-span-2' : ''}
+                        >
                           <FieldEditor
                             field={field}
                             value={draft[field.key] ?? ''}
@@ -654,8 +687,11 @@ export function WorkflowStudio({
                   {validationTitle}
                 </p>
                 <div className="mt-4 space-y-3">
-                  {validationNotes.map((note) => (
-                    <div key={note} className="rounded-xl border border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+                  {validationNotes?.map((note) => (
+                    <div
+                      key={note}
+                      className="rounded-xl border border-border bg-muted/20 p-3 text-sm text-muted-foreground"
+                    >
                       {note}
                     </div>
                   ))}
@@ -681,8 +717,11 @@ export function WorkflowStudio({
                   {provenanceTitle}
                 </p>
                 <div className="mt-4 space-y-3">
-                  {provenanceNotes.map((note) => (
-                    <div key={note} className="rounded-xl border border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+                  {provenanceNotes?.map((note) => (
+                    <div
+                      key={note}
+                      className="rounded-xl border border-border bg-muted/20 p-3 text-sm text-muted-foreground"
+                    >
                       {note}
                     </div>
                   ))}
@@ -691,7 +730,7 @@ export function WorkflowStudio({
                       Mobile behavior
                     </p>
                     <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                      {mobileNotes.map((note) => (
+                      {mobileNotes?.map((note) => (
                         <li key={note} className="flex gap-2">
                           <span className="mt-1 inline-block h-2 w-2 rounded-full bg-primary" />
                           <span>{note}</span>
@@ -723,11 +762,12 @@ export function WorkflowStudio({
                 Mobile-safe action bar
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                These controls remain visible so the workflow never feels buried on desktop or mobile.
+                These controls remain visible so the workflow never feels buried on desktop or
+                mobile.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {actions.map((action) => (
+              {actions?.map((action) => (
                 <ActionButton
                   key={`${action.id}-bottom`}
                   action={action}

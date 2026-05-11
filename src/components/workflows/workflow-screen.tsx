@@ -121,7 +121,9 @@ function SummaryRow({ row }: { row: FieldRow }) {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             {row.label}
           </p>
-          <p className={`mt-1 text-sm font-medium ${row.highlight ? 'text-secondary' : 'text-foreground'}`}>
+          <p
+            className={`mt-1 text-sm font-medium ${row.highlight ? 'text-secondary' : 'text-foreground'}`}
+          >
             {row.value}
           </p>
         </div>
@@ -247,9 +249,7 @@ export function WorkflowScreen({
           </div>
         </section>
 
-        {footerNote ? (
-          <p className="px-1 text-xs text-muted-foreground">{footerNote}</p>
-        ) : null}
+        {footerNote ? <p className="px-1 text-xs text-muted-foreground">{footerNote}</p> : null}
       </div>
     </main>
   );

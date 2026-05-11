@@ -1,7 +1,11 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { createEmptyWorkflowSnapshot, type WorkflowRecord, type WorkflowSnapshot } from '@/lib/workflow-state';
+import {
+  createEmptyWorkflowSnapshot,
+  type WorkflowRecord,
+  type WorkflowSnapshot,
+} from '@/lib/workflow-state';
 
 const storeFile = path.join(process.cwd(), 'data', 'workflow-state.json');
 
