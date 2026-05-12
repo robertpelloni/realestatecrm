@@ -1,34 +1,85 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<
+    { id: string; role: 'user' | 'assistant'; content: string }[]
+  >([
     {
+      id: '1',
       role: 'assistant',
       content: 'Hello! I am your real estate AI assistant. How can I help you today?',
     },
   ]);
-  const [input, setInput] = useState('');
 
-  const handleSend = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
-    setMessages([...messages, { role: 'user', content: input }]);
+    const userMsg = { id: Date.now().toString(), role: 'user' as const, content: input };
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
+    setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [...messages, userMsg] }),
+      });
+
+      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.body) throw new Error('No body');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let text = '';
+
+      setMessages((prev) => [
+        ...prev,
+        { id: (Date.now() + 1).toString(), role: 'assistant', content: '' },
+      ]);
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          text += decoder.decode(value, { stream: !done });
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1].content = text
+              .replace(/0:"/g, '')
+              .replace(/"/g, '')
+              .replace(/\\n/g, '\n'); // naive parse for now
+            return newMessages;
+          });
+        }
+      }
+    } catch (error) {
+      console.error(error);
       setMessages((prev) => [
         ...prev,
         {
+          id: Date.now().toString(),
           role: 'assistant',
-          content: 'This is a mocked response. AI integration is pending.',
+          content: 'Sorry, I encountered an error communicating with the server.',
         },
       ]);
-    }, 1000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -73,32 +124,49 @@ export default function AIChat() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((m, i) => (
+            {messages.map((m) => (
               <div
-                key={i}
+                key={m.id}
                 className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg p-3 text-sm ${m.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-muted/50 border border-border rounded-bl-none'}`}
+                  className={`max-w-[80%] rounded-lg p-3 text-sm whitespace-pre-wrap ${m.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-muted/50 border border-border rounded-bl-none'}`}
                 >
                   {m.content}
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-muted/50 border border-border rounded-lg rounded-bl-none p-3 text-sm flex gap-1 items-center">
+                  <div className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"></div>
+                  <div
+                    className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"
+                    style={{ animationDelay: '0.1s' }}
+                  ></div>
+                  <div
+                    className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce"
+                    style={{ animationDelay: '0.2s' }}
+                  ></div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="p-4 border-t border-border bg-background">
-            <form onSubmit={handleSend} className="flex gap-2">
+            <form onSubmit={handleSubmit} className="flex gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything..."
                 className="flex-1 bg-muted/30 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                disabled={isLoading}
               />
               <button
                 type="submit"
-                disabled={!input.trim()}
+                disabled={!input.trim() || isLoading}
                 className="px-3 py-2 bg-primary text-primary-foreground rounded-md disabled:opacity-50"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

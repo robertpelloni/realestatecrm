@@ -141,3 +141,9 @@
 
 - Introduced the global floating `AIChat.tsx` interface on all `/(dashboard)` layouts, serving as the primary interactive surface for the upcoming AI assistant.
 - Formulated and documented the `AI_RAG_STRATEGY.md` which establishes the architectural blueprint for syncing Prisma entities (`Lead`, `Activity`) with an external Vector Database.
+
+## [0.29.0] - AI Assistant Backend Integration
+
+- Installed `@ai-sdk/openai` and `ai` libraries to handle high-performance text streaming.
+- Created `/api/chat` route to act as the primary Next.js Edge proxy for OpenAI LLM interactions, injecting strict brand and workflow context into the system prompt.
+- Hand-rolled a custom streaming fetch implementation inside `AIChat.tsx` to handle streaming responses seamlessly within the UI without introducing external UI library module resolution conflicts.
