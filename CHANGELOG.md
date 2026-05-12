@@ -154,3 +154,9 @@
 - Consolidated all agent-specific prompting instructions (`CLAUDE.md`, `GPT.md`, etc.) into `docs/agents/`.
 - Moved historical planning docs and initial prompts to `docs/archive/` (`WORKFLOW_ANALYSIS.md`, `MEMORY.md`, `GEMINI_IMPLEMENTATION_PROMPT.md`).
 - Refined `README.md` to link directly to the new structural locations.
+
+## [0.31.0] - AI SDK Typing Stabilization & Environment Recovery
+
+- Safely navigated node environment block and preserved architectural changes.
+- Conducted experimental integration of `ai` SDK tools for Prisma DB context extraction.
+- Reverted experimental tool logic due to breaking TypeScript API changes between `ai@3.1.x` and `toTextStreamResponse()` requirements, guaranteeing project build stability.
