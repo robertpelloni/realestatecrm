@@ -136,3 +136,8 @@
 - Applied `src/proxy.ts` middleware matcher to automatically protect the new `/(portal)` route group.
 - Implemented data-driven views on `/portal` mapping the logged-in user's email directly to a `Contact` record, fetching their specific active `Deals` and pending `WorkflowSessions`.
 - Reconciled tracking documentation for handoff to Phase 3 agents.
+
+## [0.28.0] - Phase 3 AI Foundations
+
+- Introduced the global floating `AIChat.tsx` interface on all `/(dashboard)` layouts, serving as the primary interactive surface for the upcoming AI assistant.
+- Formulated and documented the `AI_RAG_STRATEGY.md` which establishes the architectural blueprint for syncing Prisma entities (`Lead`, `Activity`) with an external Vector Database.

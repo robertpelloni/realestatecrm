@@ -37,5 +37,10 @@
 
 ## Phase 3 Roadmap Items (Immediate)
 
-- [ ] **AI Assistant UI:** Build a global floating chat component (`AIChat.tsx`) that persists across navigation via Next.js layouts.
-- [ ] **Data RAG preparation:** Draft a technical plan for synchronizing `Activity` and `Contact` records into a vector database (e.g. Pinecone/Supabase) to support the AI assistant.
+- [x] **AI Assistant UI:** Build a global floating chat component (`AIChat.tsx`) that persists across navigation via Next.js layouts.
+- [x] **Data RAG preparation:** Draft a technical plan for synchronizing `Activity` and `Contact` records into a vector database (e.g. Pinecone/Supabase) to support the AI assistant.
+
+## Phase 3 Roadmap Items (Continued)
+
+- [ ] **Vector Sync Wiring:** Implement the background synchronization logic inside Prisma Server Actions to upsert `Activity` records to the Vector DB.
+- [ ] **AI API Route:** Build the `/api/chat` route to retrieve vectors and stream responses back to `AIChat.tsx`.

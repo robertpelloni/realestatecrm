@@ -1,3 +1,4 @@
+import AIChat from '@/components/AIChat';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import SignOutButton from '@/components/SignOutButton';
@@ -84,6 +85,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </header>
         <div className="flex-1 overflow-auto p-6">{children}</div>
       </main>
+      <AIChat />
     </div>
   );
 }
