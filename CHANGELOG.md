@@ -147,3 +147,10 @@
 - Installed `@ai-sdk/openai` and `ai` libraries to handle high-performance text streaming.
 - Created `/api/chat` route to act as the primary Next.js Edge proxy for OpenAI LLM interactions, injecting strict brand and workflow context into the system prompt.
 - Hand-rolled a custom streaming fetch implementation inside `AIChat.tsx` to handle streaming responses seamlessly within the UI without introducing external UI library module resolution conflicts.
+
+## [0.30.0] - Repository Cleanup & Organization
+
+- Reorganized project root to heavily reduce clutter.
+- Consolidated all agent-specific prompting instructions (`CLAUDE.md`, `GPT.md`, etc.) into `docs/agents/`.
+- Moved historical planning docs and initial prompts to `docs/archive/` (`WORKFLOW_ANALYSIS.md`, `MEMORY.md`, `GEMINI_IMPLEMENTATION_PROMPT.md`).
+- Refined `README.md` to link directly to the new structural locations.
