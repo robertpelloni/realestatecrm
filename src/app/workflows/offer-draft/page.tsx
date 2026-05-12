@@ -1,105 +1,151 @@
-import prisma from '@/lib/prisma';
 import { WorkflowStudio } from '@/components/workflows/workflow-studio';
-import { notFound } from 'next/navigation';
+import { getServerSession } from 'next-auth/next';
 
-export default async function OfferDraftPage(props: {
-  searchParams?: Promise<{ sessionId?: string }>;
-}) {
-  const searchParams = await props.searchParams;
-  const sessionId = searchParams?.sessionId;
+import { authOptions } from '@/lib/auth';
+import {
+  buildOfferActivitySeed,
+  buildOfferDefaults,
+  buildOfferSummaryItems,
+  getCrmRecord,
+} from '@/lib/crm-records';
+import { getWorkspaceSlug } from '@/lib/workspace-context';
 
-  const workspaces = await prisma.workspace.findMany();
-  const wsId = workspaces[0]?.id || 'mock-ws';
+function extractRecordId(searchParams: unknown) {
+  if (!searchParams) return null;
 
-  let initialSeed = [];
+  const params = searchParams as Record<string, unknown> & {
+    get?: (name: string) => string | null;
+  };
 
-  if (sessionId) {
-    const session = await prisma.workflowSession.findUnique({
-      where: { id: sessionId },
-    });
-
-    if (!session) {
-      notFound();
-    }
-
-    if (session.data) {
-      // We parse the stored JSON snapshot and extract the activity seed/history to populate the UI.
-      try {
-        const parsed = JSON.parse(session.data);
-        if (parsed.history) {
-          initialSeed = parsed.history;
-        }
-      } catch (e) {
-        console.error('Failed to parse workflow session data', e);
-      }
-    }
+  if (typeof params.get === 'function') {
+    return params.get('recordId')?.trim() || null;
   }
+
+  const candidate = params.recordId;
+  if (Array.isArray(candidate)) {
+    return candidate[0]?.trim() || null;
+  }
+
+  if (typeof candidate === 'string') {
+    return candidate.trim() || null;
+  }
+
+  return null;
+}
+
+const offerSections = [
+  {
+    title: 'Core offer details',
+    description:
+      'Edit the record with the offer terms that should flow into the package and CRM timeline.',
+    fields: [
+      { key: 'buyerName', label: 'Buyer name', type: 'text', required: true, source: 'CRM' },
+      { key: 'propertyAddress', label: 'Property address', type: 'text', required: true, source: 'MLS' },
+      { key: 'offerPrice', label: 'Offer price', type: 'number', required: true, source: 'Draft' },
+      { key: 'earnestMoney', label: 'Earnest money', type: 'number', source: 'Draft' },
+    ],
+  },
+  {
+    title: 'Terms and supporting context',
+    description:
+      'Capture the conditions, timeline, and notes that help the broker review the offer quickly.',
+    fields: [
+      {
+        key: 'closingDate',
+        label: 'Target closing date',
+        type: 'date',
+        required: true,
+        source: 'Calendar',
+      },
+      {
+        key: 'financingType',
+        label: 'Financing type',
+        type: 'select',
+        required: true,
+        options: ['Conventional', 'FHA', 'VA', 'Cash', 'USDA', 'Other'],
+        source: 'Buyer',
+      },
+      {
+        key: 'contingencies',
+        label: 'Contingencies',
+        type: 'textarea',
+        placeholder: 'Inspection, appraisal, financing...',
+        source: 'Agent',
+      },
+      {
+        key: 'inclusions',
+        label: 'Inclusions / exclusions',
+        type: 'textarea',
+        placeholder: 'What stays with the property?',
+        source: 'MLS',
+      },
+      {
+        key: 'agentNotes',
+        label: 'Comparable notes / agent notes',
+        type: 'textarea',
+        placeholder: 'Add supporting notes for pricing or strategy...',
+        source: 'Agent',
+      },
+    ],
+  },
+] as const;
+
+const offerActions = [
+  { id: 'save', label: 'Save Draft', tone: 'ghost' },
+  { id: 'docs', label: 'Attach Supporting Docs', tone: 'ghost' },
+  { id: 'package', label: 'Generate Package', tone: 'secondary' },
+  { id: 'review', label: 'Request Review', tone: 'secondary' },
+  { id: 'signature', label: 'Send for Signature', tone: 'primary' },
+] as const;
+
+type OfferDraftPageProps = {
+  searchParams?: unknown;
+};
+
+export default async function OfferDraftPage({ searchParams }: OfferDraftPageProps) {
+  const recordId = extractRecordId(await Promise.resolve(searchParams));
+  const session = await getServerSession(authOptions);
+  const workspaceSlug = getWorkspaceSlug(session);
+  const record = recordId ? await getCrmRecord(recordId, { workspaceSlug }) : null;
+  const workflowId = recordId ? `offer-draft:${recordId}` : 'offer-draft';
+  const displayRecord = record?.id === recordId ? record : null;
+  const subtitle = displayRecord
+    ? `Opening from live CRM record ${displayRecord.displayName} with draft persistence, validation checks, and mobile-safe controls.`
+    : 'Interactive offer drafting with editable form state, backend draft persistence, live CRM data, validation checks, and mobile-safe action controls.';
 
   return (
     <WorkflowStudio
+      key={workflowId}
       eyebrow="Offer workflow map"
       title="Offer Draft Screen"
-      routeLabel="/workflows/offer-draft"
-      subtitle="Assemble the required documents and pricing strategy to generate an offer for review."
-      workflowId="offer-draft"
-      storageKey="offer-draft"
-      workspaceId={wsId}
-      existingSessionId={sessionId}
-      activitySeed={initialSeed}
-      summaryItems={[
-        { label: 'Property', value: '123 Pine St, Detroit, MI', source: 'MLS' },
-        { label: 'Buyer', value: 'John Doe', source: 'CRM' },
-        { label: 'Target close', value: '30 days', source: 'Manual' },
-        { label: 'Estimated offer', value: '$450,000', source: 'Comp Engine', accent: true },
-      ]}
-      validationTitle="Offer readiness"
+      routeLabel={displayRecord ? `/dashboard → ${displayRecord.displayName}` : '/workflows/offer-draft'}
+      subtitle={subtitle}
+      workflowId={workflowId}
+      storageKey={`workflow-offer-draft${recordId ? `:${recordId}` : ''}`}
+      summaryItems={buildOfferSummaryItems(displayRecord)}
+      workspaceId={workspaceSlug}
+      existingSessionId={recordId ?? undefined}
+      sections={offerSections as unknown as Parameters<typeof WorkflowStudio>[0]['sections']}
+      actions={offerActions as unknown as Parameters<typeof WorkflowStudio>[0]['actions']}
+      validationTitle="Offer validation"
       validationNotes={[
-        'Missing proof of funds document.',
-        'Earnest money deposit amount not specified.',
-        'Inspection contingency terms pending.',
-      ]}
-      provenanceTitle="Data sources"
-      provenanceNotes={[
-        'Property data imported from Realcomp (2 hrs ago).',
-        'Buyer info synced from CRM.',
-        'Tax records matched via BS&A.',
+        'Source labels remain visible beside imported values so the agent knows what came from approved data.',
+        'The workflow blocks signature sending until required fields are complete.',
+        'Save Draft writes the current package to local storage first so the mobile experience stays reliable.',
       ]}
       mobileNotes={[
-        'Switch to desktop for full document assembly.',
-        'Review the generated PDF carefully before sending.',
+        'Use the sticky bottom action bar to save or request review on mobile.',
+        'Source provenance remains visible in the side rail when the screen collapses.',
+        'Review the draft package before sending it to the broker or client.',
       ]}
-      defaultValues={{
-        offer_amount: '450000',
-        earnest_money: '10000',
-        contingency_days: '10',
-        close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        seller_concessions: '0',
-      }}
-      sections={[
-        {
-          title: 'Pricing & Terms',
-          description: 'Set the main financial parameters for the offer.',
-          fields: [
-            { key: 'offer_amount', type: 'number', label: 'Offer Amount ($)' },
-            { key: 'earnest_money', type: 'number', label: 'Earnest Money ($)' },
-            { key: 'seller_concessions', type: 'number', label: 'Seller Concessions ($)' },
-          ],
-        },
-        {
-          title: 'Contingencies',
-          description: 'Define the necessary inspection and closing timelines.',
-          fields: [
-            { key: 'contingency_days', type: 'number', label: 'Inspection Days' },
-            { key: 'close_date', type: 'date', label: 'Target Close Date' },
-          ],
-        },
+      provenanceTitle="Source provenance"
+      provenanceNotes={[
+        'CRM data is loaded from the live dashboard record when available.',
+        'Offer terms can be traced back to the connected CRM record and MLS source.',
+        'Broker approval remains the final gate before signature or submission.',
       ]}
-      actions={[
-        { id: 'save', label: 'Save Draft', tone: 'secondary' },
-        { id: 'validate', label: 'Check Readiness', tone: 'ghost' },
-        { id: 'docs', label: 'Generate PDF', tone: 'ghost' },
-        { id: 'submit', label: 'Send for Review', tone: 'primary' },
-      ]}
+      defaultValues={buildOfferDefaults(displayRecord)}
+      activitySeed={buildOfferActivitySeed(displayRecord)}
     />
   );
 }

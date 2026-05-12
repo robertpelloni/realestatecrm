@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 import AddContactModal from '@/components/AddContactModal';
 import { contactSchema } from '@/lib/validations/contact';
 import Link from 'next/link';
@@ -46,7 +47,7 @@ export default async function ContactsPage(props: {
   const currentPage = Math.max(1, Number(searchParams?.page) || 1);
   const pageSize = 10;
 
-  const whereClause: any = {};
+  const whereClause: Prisma.ContactWhereInput = {};
   if (query) {
     whereClause.OR = [
       { firstName: { contains: query } },

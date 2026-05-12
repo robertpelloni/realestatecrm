@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 import AddLeadModal from '@/components/AddLeadModal';
 import Link from 'next/link';
 import { leadSchema } from '@/lib/validations/lead';
@@ -55,7 +56,7 @@ export default async function LeadsPage(props: {
   const currentPage = Math.max(1, Number(searchParams?.page) || 1);
   const pageSize = 10;
 
-  const whereClause: any = {};
+  const whereClause: Prisma.LeadWhereInput = {};
 
   if (query) {
     whereClause.OR = [

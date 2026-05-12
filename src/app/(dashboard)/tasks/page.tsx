@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 import AddTaskModal from '@/components/AddTaskModal';
 import { taskSchema } from '@/lib/validations/task';
 import Link from 'next/link';
@@ -49,7 +50,7 @@ export default async function TasksPage(props: {
   const currentPage = Math.max(1, Number(searchParams?.page) || 1);
   const pageSize = 10;
 
-  const whereClause: any = {};
+  const whereClause: Prisma.TaskWhereInput = {};
 
   if (query) {
     whereClause.title = { contains: query };

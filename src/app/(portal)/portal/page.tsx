@@ -31,7 +31,7 @@ export default async function PortalHome() {
         <div className="bg-muted/10 border border-border rounded-xl p-8 text-center space-y-4 max-w-lg">
           <h1 className="text-3xl font-bold">Welcome, {session.user.name || session.user.email}</h1>
           <p className="text-muted-foreground">
-            We couldn't find any active files linked to your email address. Please contact your
+            We couldn&apos;t find any active files linked to your email address. Please contact your
             agent to ensure your email matches their records.
           </p>
         </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { saveWorkflowSession, submitWorkflowSession } from '@/lib/actions/workflow';
+import { saveWorkflowSession } from '@/lib/actions/workflow';
 
 import {
   createEmptyWorkflowSnapshot,
@@ -281,7 +281,7 @@ export function WorkflowStudio({
 
     const loadState = async () => {
       try {
-        const response = await fetch(`/api/workflows/${workflowId}`, { cache: 'no-store' });
+        const response = await fetch(`/api/workflows/${encodeURIComponent(workflowId)}`, { cache: 'no-store' });
         if (!isActive) return;
 
         if (response.ok) {
@@ -391,7 +391,7 @@ export function WorkflowStudio({
     setBanner(options.note);
 
     try {
-      const response = await fetch(`/api/workflows/${workflowId}`, {
+      const response = await fetch(`/api/workflows/${encodeURIComponent(workflowId)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ snapshot }),
