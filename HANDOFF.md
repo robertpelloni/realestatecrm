@@ -4,13 +4,14 @@
 
 **Current Session:**
 
-- Finalized Phase 2 Workflow engine integration by deeply linking `WorkflowSessions` to `Deals`. Users can generate "New Offer Drafts" or "New Listing Entries" directly from `deals/[id]/page.tsx`.
-- Navigated a complex Next.js 15 route conflict between the `(dashboard)` root `page.tsx` and the newly scaffolded `(portal)` route group. Safely resolved by placing the portal under `/portal`.
-- Scaffolded the baseline UI for the Client Portal where end-users will eventually review and sign the workflows prepared by agents.
-- Bumped version to `0.26.0`.
+- Began executing the Phase 3 (AI & Voice) roadmap objectives.
+- Intercepted a divergent `origin/main` upstream and merged intelligently, resolving merge conflicts.
+- Bootstrapped the backend API for the AI Assistant. Created `src/app/api/chat/route.ts` leveraging `@ai-sdk/openai` to stream `gpt-4o` responses.
+- Re-architected `AIChat.tsx` to manually parse Vercel AI Text Streams natively. This bypasses a recurring Next.js 15 Turbopack compilation error involving the `ai/react` UI hooks, guaranteeing build stability.
+- Verified build and TypeScript health across the entire mono-repo layout. Bumped to v0.29.0.
 
 **Next Steps for Next Model/Agent:**
 
-1. **Portal Authentication:** The `/portal` route is currently static mock data. It needs an authentication layer (e.g., Magic Links via NextAuth, or a specific `role="CLIENT"` check) to load the actual Deals and Workflows tied to the logged-in client's email.
-2. **Re-attempt Task Schemas:** The `Task.assignedToId` mapping to `User` failed earlier due to ambiguous relation definitions overlapping with `Contact.assignedTo`. Find a clean way to apply this schema mutation.
-3. **Advanced Filtering:** Consider building a complex multi-select filtering component for the data tables to replace the basic `<select>` dropdowns.
+1. **Vector Sync Wiring:** The `AIChat` is now conversing directly with OpenAI. However, it lacks deep CRM context. Follow `docs/AI_RAG_STRATEGY.md` to implement background Prisma Server Actions that upsert new `Activity` and `Contact` records directly into Pinecone/Supabase.
+2. **AI Action/Function Calling:** Expand the `/api/chat` route to use Vercel AI's `tools` mechanism, allowing the LLM to query `prisma.lead.findMany()` directly if the user asks "How many leads do I have?".
+3. **Client Magic Links:** The Portal still relies on traditional sign-in. We need to implement a Magic Link flow (`next-auth/providers/email`) for frictionless client onboarding.
