@@ -16,6 +16,8 @@ export const config = {
      * - favicon.ico (favicon file)
      * - auth/signin (sign in page)
      * - root (/) (landing page)
+     *
+     * Note: /portal is implicitly protected by this matcher.
      */
     '/((?!api|_next/static|_next/image|favicon.ico|auth/signin|$).*)',
   ],

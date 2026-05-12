@@ -34,3 +34,8 @@
 - [x] **Client Portal Routing:** Create `src/app/(portal)` route group with layout. Add magic-link or dedicated Auth checks.
 - [x] **Portal Home:** Display assigned Deals and Workflows for the client.
 - [x] **Workflow Deal Integration:** Link workflows directly to Deal IDs in the UI so users can trigger them from `/deals/[id]`.
+
+## Phase 3 Roadmap Items (Immediate)
+
+- [ ] **AI Assistant UI:** Build a global floating chat component (`AIChat.tsx`) that persists across navigation via Next.js layouts.
+- [ ] **Data RAG preparation:** Draft a technical plan for synchronizing `Activity` and `Contact` records into a vector database (e.g. Pinecone/Supabase) to support the AI assistant.

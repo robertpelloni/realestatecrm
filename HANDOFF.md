@@ -4,13 +4,14 @@
 
 **Current Session:**
 
-- Finalized Phase 2 Workflow engine integration by deeply linking `WorkflowSessions` to `Deals`. Users can generate "New Offer Drafts" or "New Listing Entries" directly from `deals/[id]/page.tsx`.
-- Navigated a complex Next.js 15 route conflict between the `(dashboard)` root `page.tsx` and the newly scaffolded `(portal)` route group. Safely resolved by placing the portal under `/portal`.
-- Scaffolded the baseline UI for the Client Portal where end-users will eventually review and sign the workflows prepared by agents.
-- Bumped version to `0.26.0`.
+- Intercepted a divergent `origin/main` upstream and merged intelligently, resolving several merge conflicts in project docs.
+- Re-architected NextAuth JWT mapping to correctly pass the `User.id` and `User.role` into the `Session` object.
+- Fully wired the `/portal` dashboard UI to real Database entities. It now verifies the current session, queries the `Contact` matching the session email, and displays their associated `Deals` and Action Items (`WorkflowSession` drafts).
+- Verified `Task` assigned schemas are fully intact and functional.
+- Bumped version to `0.27.0`.
 
 **Next Steps for Next Model/Agent:**
 
-1. **Portal Authentication:** The `/portal` route is currently static mock data. It needs an authentication layer (e.g., Magic Links via NextAuth, or a specific `role="CLIENT"` check) to load the actual Deals and Workflows tied to the logged-in client's email.
-2. **Re-attempt Task Schemas:** The `Task.assignedToId` mapping to `User` failed earlier due to ambiguous relation definitions overlapping with `Contact.assignedTo`. Find a clean way to apply this schema mutation.
+1. **Client Magic Links:** The Portal relies on traditional sign-in right now (using Credentials provider). We need to implement a Magic Link flow (`next-auth/providers/email`) for frictionless client onboarding.
+2. **Phase 3 Foundations:** The core MVP is extremely solid. All basic CRM entities exist and are wired with Zod validation, Pagination, and Activity timelines. The Workflow Engine is persisting drafts to the database. Next up is Phase 3: AI and Voice.
 3. **Advanced Filtering:** Consider building a complex multi-select filtering component for the data tables to replace the basic `<select>` dropdowns.
