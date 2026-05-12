@@ -21,6 +21,7 @@ pnpm-debug.log*
 /out
 /.next
 /.turbo
+/data/workflow-state.json
 
 # Python
 __pycache__/
@@ -36,3 +37,5 @@ coverage/
 .expo/
 android/.gradle/
 ios/Pods/
+
+/src/generated/prisma
