@@ -4,15 +4,13 @@
 
 **Current Session:**
 
-- Rebased the local branch on top of the latest GitHub `main`, resolved merge conflicts in `.env.example`, `package.json`, `package-lock.json`, and `src/lib/auth.ts`, and re-applied the project’s Prisma/dashboard/auth/workflow changes.
-- Restored a working GitHub SSH auth path locally, then successfully pushed the merged result back to `origin/main`.
-- Updated the repo docs and versioning to mark the sync/release checkpoint.
-- Verified the codebase with `npm run lint` and `npm run build` after the merge/reapply cycle.
-- Bumped version to `0.33.0`.
+- Added workspace-aware RAG chat context with a dedicated `src/lib/rag.ts` helper and refreshed the `/api/chat` route so it now reads the active workspace before streaming AI replies.
+- Implemented the first vector-sync wiring pass: created a shared activity server action, added a RAG sync helper with a remote endpoint option plus local outbox fallback, and connected the lead/contact/deal detail pages to use the shared action.
+- Verified the repo with `npm run lint` and `npm run build` after the sync wiring.
+- Bumped version to `0.34.0`.
 
 **Next Steps for Next Model/Agent:**
 
-1. **Vector Sync Wiring:** Proceed with `docs/AI_RAG_STRATEGY.md` and build the server-side logic to vectorize `Activity` updates into Pinecone/Supabase.
-2. **AI Action/Function Calling:** Re-evaluate the `ai` module peer dependencies and tool typing so the LLM can securely query `Prisma` data in real-time.
-3. **Production Auth Hardening:** Move from merged development auth scaffolding toward workspace-scoped production auth, permissions, and session guardrails.
-4. **Deployment Readiness:** Confirm environment variables, database migration path, and production deployment checklist before shipping the next major feature slice.
+1. **True Vector Embeddings:** Replace the outbox/document fallback with actual embeddings + a vector database provider (Pinecone, Supabase pgvector, etc.).
+2. **Production Auth Hardening:** Move from merged development auth scaffolding toward workspace-scoped production auth, permissions, and session guardrails.
+3. **Deployment Readiness:** Confirm environment variables, database migration path, and production deployment checklist before shipping the next major feature slice.

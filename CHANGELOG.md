@@ -173,3 +173,10 @@
 - Reapplied the Prisma, dashboard, workflow, and auth workspace changes after the upstream merge.
 - Verified the repo with `npm run lint` and `npm run build`.
 - Successfully pushed the merged state back to `origin/main`.
+
+## [0.34.0] - Workspace-Aware RAG Sync Wiring
+
+- Added a shared activity server action that persists CRM activity records and triggers vector sync after each save.
+- Added a RAG sync helper with a remote vector endpoint path and a local outbox fallback at `data/rag-outbox.json`.
+- Upgraded the chat API to inject workspace-aware CRM context before streaming responses.
+- Kept the dashboard contact, lead, and deal activity screens wired to the shared server action for consistent sync behavior.

@@ -1,50 +1,7 @@
-import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import AddActivityForm from '@/components/AddActivityForm';
-import { activitySchema } from '@/lib/validations/activity';
-
-async function addActivity(formData: FormData) {
-  'use server';
-
-  const rawData = {
-    content: formData.get('content'),
-    type: formData.get('type'),
-    workspaceId: formData.get('workspaceId'),
-    leadId: formData.get('leadId'),
-    dealId: formData.get('dealId'),
-    contactId: formData.get('contactId'),
-  };
-
-  const validatedData = activitySchema.safeParse(rawData);
-
-  if (!validatedData.success) {
-    return { error: validatedData.error.issues[0].message };
-  }
-
-  const data = validatedData.data;
-
-  try {
-    await prisma.activity.create({
-      data: {
-        content: data.content,
-        type: data.type,
-        workspaceId: data.workspaceId,
-        leadId: data.leadId || null,
-        dealId: data.dealId || null,
-        contactId: data.contactId || null,
-      },
-    });
-
-    if (data.contactId) {
-      revalidatePath(`/contacts/${data.contactId}`);
-    }
-  } catch (error) {
-    console.error('Failed to add activity:', error);
-    return { error: 'An unexpected error occurred while saving.' };
-  }
-}
+import { createActivityAction as addActivity } from '@/lib/actions/activity';
 
 export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;

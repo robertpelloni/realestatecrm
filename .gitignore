@@ -22,6 +22,7 @@ pnpm-debug.log*
 /.next
 /.turbo
 /data/workflow-state.json
+/data/rag-outbox.json
 
 # Python
 __pycache__/
