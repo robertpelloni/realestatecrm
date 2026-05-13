@@ -1,6 +1,7 @@
 [PROJECT_MEMORY]
 
 ## Architecture & Technology Stack
+
 - **Framework:** Next.js 15+ (App Router, Turbopack enabled)
 - **Language:** TypeScript across frontend and backend.
 - **ORM & Database:** Prisma ORM. Currently configured to use local SQLite (`dev.db`), with plans to migrate to a scalable edge-friendly provider (like Turso/libSQL or a hosted Postgres) before production. Prisma is pinned to `^5.14.0` (resolving to `v5.22.0`) to avoid SQLite lock contention issues in newer versions during concurrent development and testing.
@@ -9,6 +10,7 @@
 - **Styling & UI:** Tailwind CSS v4, adhering to a strict luxury theme palette (Black/Blue/Gold). Components use `react-hot-toast` for unified mutation feedback.
 
 ## Core Patterns & Conventions
+
 - **Server Actions over API Routes:** For data mutations (e.g., adding a lead, creating a deal, logging an activity, saving workflows), the project relies heavily on Next.js Server Actions placed in the same component file or within `src/lib/actions/`. This streamlines data flow and leverages `revalidatePath` for optimistic UI updates.
 - **Input Validation (Zod):** Zod schemas are defined in `src/lib/validations/` (e.g., `lead.ts`, `deal.ts`, `workflow.ts`) and actively utilized within Server Actions to rigorously parse and validate incoming `FormData` before hitting Prisma. Error strings are passed back to client components for display.
 - **Route Groups & Collisions:** The application uses route groups extensively (`(dashboard)`, `(portal)`). Because Next.js 15 throws build errors if two route groups resolve to the exact same root path, the portal was explicitly nested under `src/app/(portal)/portal/page.tsx` to prevent collision with `(dashboard)/page.tsx`.
@@ -17,6 +19,7 @@
 - **Navigation:** Strict usage of Next.js `<Link>` components over raw HTML `<a>` tags to enable prefetching and smooth SPA-like transitions within the App Router.
 
 ## Data Models (Prisma Schema)
+
 - **User & Workspace:** Foundational multi-tenant structure. Users belong to a Workspace.
 - **CRM Entities:**
   - `Contact`: Established relationships (People).
@@ -27,12 +30,14 @@
   - `WorkflowSession`: Persists JSON state payloads for complex multi-step forms (e.g., `OFFER_DRAFT`, `LISTING_ENTRY`), enabling users to save, resume, and eventually submit drafted documents.
 
 ## Recent Architectural Decisions & Workarounds
+
 - **Workflow Engine Implementation:** Migrated upstream static workflow shells away from Local Storage. They are now deeply wired to the SQLite backend via the `WorkflowSession` model. Server actions parse `?sessionId` parameters from the URL to rehydrate drafts dynamically.
 - **Deal-Workflow Integration:** The `deals/[id]` detail view was expanded to query and list active `WorkflowSessions` associated with the deal. Users can launch new drafts (passing `?dealId=...` in the URL) directly from the Deal screen, successfully bridging the CRM core with the Workflow engine.
 - **Client Portal Scaffolding & Security:** Scaffolded the `(portal)` route group as a distinct environment. The Portal verifies the NextAuth session, matches the user's email against the `Contact` table, and exclusively renders their related Deals and Action Items.
 - **Phase 3 AI Scaffolding:** Introduced `AIChat.tsx` as a global layout component and wired it to `api/chat` using OpenAI streaming. An attempt to map `Vercel AI SDK` tools directly to Prisma queries was safely aborted and documented due to a volatile TypeScript mismatch between `ai@3.1.x` and the text stream return types.
 
 ## Roadmap & Future Directions
+
 - **Tool Calling Refinement (AI):** The immediate priority is executing a clean dependency audit for `ai` and `@ai-sdk/react` to allow server-side function calling (e.g., `prisma.lead.count()`) directly inside the `/api/chat` router.
 - **RAG Architecture Sync:** Implement the architectural blueprint defined in `docs/AI_RAG_STRATEGY.md` by hooking Prisma mutations (like new `Activity` entries) to a Vector database (Pinecone/Supabase) to give the LLM semantic context.
 - **Client Magic Links:** Replace standard credentials on the Portal with a NextAuth Email Provider logic for frictionless client onboarding.
