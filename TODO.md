@@ -44,3 +44,11 @@
 
 - [ ] **Vector Sync Wiring:** Implement the background synchronization logic inside Prisma Server Actions to upsert `Activity` records to the Vector DB.
 - [x] **AI API Route:** Build the `/api/chat` route to retrieve vectors and stream responses back to `AIChat.tsx`.
+
+## Release Checkpoint
+
+- [x] Rebase and merge the latest GitHub `main` back into the local branch.
+- [x] Reapply the Prisma, dashboard, workflow, and auth updates after the merge.
+- [x] Verify lint and production build.
+- [x] Push the merged state back to `origin/main`.
+- [ ] Update release notes and versioning to reflect the new checkpoint.

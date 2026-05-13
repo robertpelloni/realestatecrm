@@ -166,3 +166,10 @@
 - Migrated NextAuth configuration to use the `@next-auth/prisma-adapter` natively.
 - Implemented `EmailProvider` for Magic Link authentication to support frictionless Client Portal logins without managing user passwords.
 - Added `VerificationToken` to Prisma schema to support secure login verification.
+
+## [0.33.0] - GitHub Sync & Release Checkpoint
+
+- Rebased the local branch on top of the latest GitHub `main` and resolved merge conflicts in auth and environment files.
+- Reapplied the Prisma, dashboard, workflow, and auth workspace changes after the upstream merge.
+- Verified the repo with `npm run lint` and `npm run build`.
+- Successfully pushed the merged state back to `origin/main`.
