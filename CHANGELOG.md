@@ -147,3 +147,22 @@
 - Installed `@ai-sdk/openai` and `ai` libraries to handle high-performance text streaming.
 - Created `/api/chat` route to act as the primary Next.js Edge proxy for OpenAI LLM interactions, injecting strict brand and workflow context into the system prompt.
 - Hand-rolled a custom streaming fetch implementation inside `AIChat.tsx` to handle streaming responses seamlessly within the UI without introducing external UI library module resolution conflicts.
+
+## [0.30.0] - Repository Cleanup & Organization
+
+- Reorganized project root to heavily reduce clutter.
+- Consolidated all agent-specific prompting instructions (`CLAUDE.md`, `GPT.md`, etc.) into `docs/agents/`.
+- Moved historical planning docs and initial prompts to `docs/archive/` (`WORKFLOW_ANALYSIS.md`, `MEMORY.md`, `GEMINI_IMPLEMENTATION_PROMPT.md`).
+- Refined `README.md` to link directly to the new structural locations.
+
+## [0.31.0] - AI SDK Typing Stabilization & Environment Recovery
+
+- Safely navigated node environment block and preserved architectural changes.
+- Conducted experimental integration of `ai` SDK tools for Prisma DB context extraction.
+- Reverted experimental tool logic due to breaking TypeScript API changes between `ai@3.1.x` and `toTextStreamResponse()` requirements, guaranteeing project build stability.
+
+## [0.32.0] - Client Portal Magic Links (Phase 2 completion)
+
+- Migrated NextAuth configuration to use the `@next-auth/prisma-adapter` natively.
+- Implemented `EmailProvider` for Magic Link authentication to support frictionless Client Portal logins without managing user passwords.
+- Added `VerificationToken` to Prisma schema to support secure login verification.
