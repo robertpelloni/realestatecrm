@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## [0.36.0] - Hosted Vector Provider Finalization
+
+- Added a provider switch for Pinecone or custom vector sync endpoints, with Pinecone auto-detection via environment variables.
+- Kept the deterministic local embedding/vector-index fallback so the CRM still works without hosted infrastructure.
+- Added remote vector query support so workspace chat can retrieve semantic results from a hosted provider when available.
+- Documented Pinecone-specific environment variables alongside the existing RAG sync settings.
+
 ## [0.35.0] - Vector Embeddings & CRM Retrieval Wiring
 
 - Added OpenAI-backed embeddings with a deterministic local fallback for development.

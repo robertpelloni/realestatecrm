@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { cosineSimilarity, embed } from 'ai';
+import { embed } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import type { Activity, Contact, Deal, Lead } from '@prisma/client';
 
@@ -33,6 +33,7 @@ type VectorIndexEntry = VectorSyncRecord & {
   syncedAt: string;
   status: 'synced' | 'queued' | 'failed';
   destination: 'remote' | 'local';
+  provider: 'pinecone' | 'custom' | 'local';
   error?: string;
 };
 
@@ -41,6 +42,7 @@ type VectorOutboxEntry = VectorSyncRecord & {
   createdAt: string;
   status: 'synced' | 'queued' | 'failed';
   destination: 'remote' | 'local';
+  provider: 'pinecone' | 'custom' | 'local';
   error?: string;
 };
 
@@ -51,10 +53,20 @@ export type ActivitySyncContext = {
   deal?: Pick<Deal, 'id' | 'title' | 'stage' | 'value'> | null;
 };
 
+type VectorProviderMode = 'pinecone' | 'custom' | 'local';
+
+type VectorQueryOptions = {
+  workspaceId: string;
+  query: string;
+  limit?: number;
+  entityTypes?: VectorEntityType[];
+};
+
 const DATA_DIR = path.join(process.cwd(), 'data');
 const VECTOR_INDEX_PATH = path.join(DATA_DIR, 'vector-index.json');
 const VECTOR_OUTBOX_PATH = path.join(DATA_DIR, 'rag-outbox.json');
 const DEFAULT_EMBEDDING_MODEL = process.env.RAG_EMBEDDING_MODEL?.trim() || 'text-embedding-3-small';
+const PINECONE_NAMESPACE = process.env.PINECONE_NAMESPACE?.trim() || 'realestatecrm';
 
 function displayName(firstName?: string | null, lastName?: string | null) {
   return [firstName, lastName].filter(Boolean).join(' ').trim();
@@ -73,6 +85,26 @@ function normalizeVector(values: number[]) {
   const magnitude = Math.sqrt(values.reduce((sum, value) => sum + value * value, 0));
   if (!magnitude) return values.map(() => 0);
   return values.map((value) => value / magnitude);
+}
+
+function cosineSimilarity(left: number[], right: number[]) {
+  const length = Math.min(left.length, right.length);
+  if (!length) return 0;
+
+  let dot = 0;
+  let leftMagnitude = 0;
+  let rightMagnitude = 0;
+
+  for (let index = 0; index < length; index += 1) {
+    const leftValue = left[index] ?? 0;
+    const rightValue = right[index] ?? 0;
+    dot += leftValue * rightValue;
+    leftMagnitude += leftValue * leftValue;
+    rightMagnitude += rightValue * rightValue;
+  }
+
+  if (!leftMagnitude || !rightMagnitude) return 0;
+  return dot / (Math.sqrt(leftMagnitude) * Math.sqrt(rightMagnitude));
 }
 
 function fallbackEmbedding(text: string) {
@@ -223,105 +255,311 @@ function buildDealDocument(deal: Pick<Deal, 'id' | 'title' | 'stage' | 'value'>,
     .join('\n');
 }
 
+function getVectorProviderMode(): VectorProviderMode {
+  const configured = process.env.RAG_VECTOR_PROVIDER?.trim().toLowerCase();
+  if (configured === 'pinecone' || configured === 'custom' || configured === 'local') {
+    return configured;
+  }
+
+  if (process.env.PINECONE_API_KEY?.trim() && process.env.PINECONE_INDEX_HOST?.trim()) {
+    return 'pinecone';
+  }
+
+  if (process.env.RAG_VECTOR_ENDPOINT?.trim()) {
+    return 'custom';
+  }
+
+  return 'local';
+}
+
+function normalizeHost(host: string) {
+  return host.trim().replace(/\/+$/, '');
+}
+
+function buildPineconeUrl(pathSuffix: string) {
+  const host = process.env.PINECONE_INDEX_HOST?.trim();
+  if (!host) {
+    throw new Error('PINECONE_INDEX_HOST is required for Pinecone sync');
+  }
+
+  return `${normalizeHost(host)}${pathSuffix.startsWith('/') ? pathSuffix : `/${pathSuffix}`}`;
+}
+
+function sanitizeMetadata(metadata: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(metadata).filter(([, value]) => value !== undefined),
+  );
+}
+
+async function upsertToCustomEndpoint(record: VectorSyncRecord, embedding: number[], syncedAt: string) {
+  const endpoint = process.env.RAG_VECTOR_ENDPOINT?.trim();
+  if (!endpoint) {
+    throw new Error('RAG_VECTOR_ENDPOINT is required for custom sync');
+  }
+
+  const apiKey = process.env.RAG_VECTOR_API_KEY?.trim();
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+    },
+    body: JSON.stringify({
+      ...record,
+      embedding,
+      syncedAt,
+      namespace: record.workspaceId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error((await response.text().catch(() => 'Custom vector sync failed')).slice(0, 500));
+  }
+}
+
+async function upsertToPinecone(record: VectorSyncRecord, embedding: number[], syncedAt: string) {
+  const apiKey = process.env.PINECONE_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error('PINECONE_API_KEY is required for Pinecone sync');
+  }
+
+  const response = await fetch(buildPineconeUrl('/vectors/upsert'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Api-Key': apiKey,
+    },
+    body: JSON.stringify({
+      namespace: PINECONE_NAMESPACE,
+      vectors: [
+        {
+          id: `${record.entityType}:${record.entityId}`,
+          values: embedding,
+          metadata: sanitizeMetadata({
+            ...record.metadata,
+            workspaceId: record.workspaceId,
+            entityType: record.entityType,
+            entityId: record.entityId,
+            document: record.document,
+            syncedAt,
+          }),
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error((await response.text().catch(() => 'Pinecone vector sync failed')).slice(0, 500));
+  }
+}
+
 async function syncVectorRecord(record: VectorSyncRecord) {
   const embedding = await generateEmbedding(record.document);
   const index = await readVectorIndex();
   const now = new Date().toISOString();
   const id = `${record.entityType}:${record.entityId}`;
-  const endpoint = process.env.RAG_VECTOR_ENDPOINT?.trim();
-  const apiKey = process.env.RAG_VECTOR_API_KEY?.trim();
+  const provider = getVectorProviderMode();
+  let status: VectorIndexEntry['status'] = provider === 'local' ? 'queued' : 'queued';
+  let destination: VectorIndexEntry['destination'] = provider === 'local' ? 'local' : 'remote';
+  let error: string | undefined;
 
-  const localEntry: VectorIndexEntry = {
+  try {
+    if (provider === 'pinecone') {
+      await upsertToPinecone(record, embedding, now);
+      status = 'synced';
+      destination = 'remote';
+    } else if (provider === 'custom') {
+      await upsertToCustomEndpoint(record, embedding, now);
+      status = 'synced';
+      destination = 'remote';
+    }
+  } catch (syncError) {
+    status = 'failed';
+    destination = 'local';
+    error = syncError instanceof Error ? syncError.message : 'Unknown vector sync error';
+  }
+
+  const entry: VectorIndexEntry = {
     ...record,
     id,
     embedding,
     syncedAt: now,
-    destination: endpoint ? 'remote' : 'local',
-    status: endpoint ? 'queued' : 'queued',
+    status,
+    destination,
+    provider,
+    error,
   };
 
-  const existingIndex = index.filter((entry) => entry.id !== id);
-  existingIndex.unshift(localEntry);
+  const existingIndex = index.filter((existing) => existing.id !== id);
+  existingIndex.unshift(entry);
   await writeVectorIndex(existingIndex.slice(0, 2000));
 
-  if (!endpoint) {
-    await appendOutbox({
-      ...record,
-      id,
-      createdAt: now,
-      destination: 'local',
-      status: 'queued',
-    });
+  await appendOutbox({
+    ...record,
+    id,
+    createdAt: now,
+    status,
+    destination,
+    provider,
+    error,
+  });
 
-    return { status: 'queued' as const, destination: 'local' as const };
+  return { status, destination, provider, error };
+}
+
+function normalizeRemoteMatches(
+  matches: Array<{
+    id?: string;
+    score?: number;
+    metadata?: Record<string, unknown>;
+  }>,
+) {
+  return matches
+    .map((match) => {
+      const metadata = match.metadata ?? {};
+      const workspaceId = typeof metadata.workspaceId === 'string' ? metadata.workspaceId : '';
+      const entityType = typeof metadata.entityType === 'string' ? metadata.entityType : '';
+      const entityId = metadata.entityId;
+      const document = typeof metadata.document === 'string' ? metadata.document : '';
+      const syncedAt = typeof metadata.syncedAt === 'string' ? metadata.syncedAt : new Date().toISOString();
+      const validEntityType =
+        entityType === 'activity' || entityType === 'contact' || entityType === 'deal' || entityType === 'lead'
+          ? entityType
+          : null;
+
+      if (!workspaceId || !validEntityType) {
+        return null;
+      }
+
+      return {
+        id: match.id ?? `${validEntityType}:${String(entityId ?? '')}`,
+        workspaceId,
+        entityType: validEntityType,
+        entityId: String(entityId ?? ''),
+        document,
+        metadata,
+        score: match.score ?? 0,
+        syncedAt,
+        status: 'synced' as const,
+        destination: 'remote' as const,
+      } satisfies VectorSearchResult;
+    })
+    .filter((item): item is VectorSearchResult => item !== null);
+}
+
+async function queryPinecone({ workspaceId, query, limit = 5, entityTypes }: VectorQueryOptions) {
+  const apiKey = process.env.PINECONE_API_KEY?.trim();
+  if (!apiKey) {
+    return [];
   }
 
-  try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+  const queryEmbedding = await generateEmbedding(query);
+  const response = await fetch(buildPineconeUrl('/query'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Api-Key': apiKey,
+    },
+    body: JSON.stringify({
+      namespace: PINECONE_NAMESPACE,
+      topK: limit,
+      includeMetadata: true,
+      vector: queryEmbedding,
+      filter: {
+        workspaceId: { $eq: workspaceId },
+        ...(entityTypes?.length ? { entityType: { $in: entityTypes } } : {}),
       },
-      body: JSON.stringify({
-        ...record,
-        embedding,
-        syncedAt: now,
-      }),
-    });
+    }),
+  });
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Remote vector sync failed');
-      const failedEntry: VectorIndexEntry = {
-        ...localEntry,
-        status: 'failed',
-        destination: 'local',
-        error: errorText.slice(0, 500),
-      };
-      await writeVectorIndex([failedEntry, ...existingIndex.filter((entry) => entry.id !== id)].slice(0, 2000));
-      await appendOutbox({
-        ...record,
-        id,
-        createdAt: now,
-        destination: 'local',
-        status: 'failed',
-        error: errorText.slice(0, 500),
-      });
-      return { status: 'failed' as const, destination: 'local' as const };
-    }
-
-    const syncedEntry: VectorIndexEntry = {
-      ...localEntry,
-      status: 'synced',
-      destination: 'remote',
-    };
-    await writeVectorIndex([syncedEntry, ...existingIndex.filter((entry) => entry.id !== id)].slice(0, 2000));
-    await appendOutbox({
-      ...record,
-      id,
-      createdAt: now,
-      destination: 'remote',
-      status: 'synced',
-    });
-    return { status: 'synced' as const, destination: 'remote' as const };
-  } catch (error) {
-    const failedEntry: VectorIndexEntry = {
-      ...localEntry,
-      status: 'failed',
-      destination: 'local',
-      error: error instanceof Error ? error.message : 'Unknown vector sync error',
-    };
-    await writeVectorIndex([failedEntry, ...existingIndex.filter((entry) => entry.id !== id)].slice(0, 2000));
-    await appendOutbox({
-      ...record,
-      id,
-      createdAt: now,
-      destination: 'local',
-      status: 'failed',
-      error: error instanceof Error ? error.message : 'Unknown vector sync error',
-    });
-    return { status: 'failed' as const, destination: 'local' as const };
+  if (!response.ok) {
+    throw new Error((await response.text().catch(() => 'Pinecone query failed')).slice(0, 500));
   }
+
+  const payload = (await response.json()) as { matches?: Array<{ id?: string; score?: number; metadata?: Record<string, unknown> }> };
+  return normalizeRemoteMatches(payload.matches ?? []);
+}
+
+async function queryCustomEndpoint({ workspaceId, query, limit = 5, entityTypes }: VectorQueryOptions) {
+  const endpoint = process.env.RAG_VECTOR_ENDPOINT?.trim();
+  if (!endpoint) {
+    return [];
+  }
+
+  const apiKey = process.env.RAG_VECTOR_API_KEY?.trim();
+  const queryEmbedding = await generateEmbedding(query);
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+    },
+    body: JSON.stringify({
+      mode: 'query',
+      workspaceId,
+      limit,
+      entityTypes,
+      query,
+      embedding: queryEmbedding,
+      namespace: workspaceId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error((await response.text().catch(() => 'Custom query failed')).slice(0, 500));
+  }
+
+  const payload = (await response.json()) as
+    | Array<{ id?: string; score?: number; metadata?: Record<string, unknown> }>
+    | { matches?: Array<{ id?: string; score?: number; metadata?: Record<string, unknown> }> };
+
+  const matches = Array.isArray(payload) ? payload : payload.matches ?? [];
+  return normalizeRemoteMatches(matches);
+}
+
+async function queryLocalIndex({ workspaceId, query, limit = 5, entityTypes }: VectorQueryOptions) {
+  const index = await readVectorIndex();
+  const filtered = index.filter((entry) => {
+    const matchesWorkspace = entry.workspaceId === workspaceId;
+    const matchesEntityType = !entityTypes?.length || entityTypes.includes(entry.entityType);
+    return matchesWorkspace && matchesEntityType;
+  });
+
+  if (!query.trim()) {
+    return filtered
+      .sort((a, b) => b.syncedAt.localeCompare(a.syncedAt))
+      .slice(0, limit)
+      .map((entry) => ({
+        id: entry.id,
+        workspaceId: entry.workspaceId,
+        entityType: entry.entityType,
+        entityId: entry.entityId,
+        document: entry.document,
+        metadata: entry.metadata,
+        score: 0,
+        syncedAt: entry.syncedAt,
+        status: entry.status,
+        destination: entry.destination,
+      }));
+  }
+
+  const queryEmbedding = await generateEmbedding(query);
+
+  return filtered
+    .map((entry) => ({
+      id: entry.id,
+      workspaceId: entry.workspaceId,
+      entityType: entry.entityType,
+      entityId: entry.entityId,
+      document: entry.document,
+      metadata: entry.metadata,
+      score: cosineSimilarity(queryEmbedding, entry.embedding),
+      syncedAt: entry.syncedAt,
+      status: entry.status,
+      destination: entry.destination,
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
 }
 
 export async function syncLeadToVectorStore(
@@ -394,58 +632,24 @@ export async function syncDealToVectorStore(
   });
 }
 
-export async function searchWorkspaceVectors({
-  workspaceId,
-  query,
-  limit = 5,
-  entityTypes,
-}: {
-  workspaceId: string;
-  query: string;
-  limit?: number;
-  entityTypes?: VectorEntityType[];
-}): Promise<VectorSearchResult[]> {
-  const normalizedQuery = query.trim();
-  const index = await readVectorIndex();
-  const filtered = index.filter((entry) => {
-    const matchesWorkspace = entry.workspaceId === workspaceId;
-    const matchesEntityType = !entityTypes || entityTypes.includes(entry.entityType);
-    return matchesWorkspace && matchesEntityType;
-  });
+export async function searchWorkspaceVectors({ workspaceId, query, limit = 5, entityTypes }: VectorQueryOptions): Promise<VectorSearchResult[]> {
+  const provider = getVectorProviderMode();
 
-  if (!normalizedQuery) {
-    return filtered
-      .sort((a, b) => b.syncedAt.localeCompare(a.syncedAt))
-      .slice(0, limit)
-      .map((entry) => ({
-        id: entry.id,
-        workspaceId: entry.workspaceId,
-        entityType: entry.entityType,
-        entityId: entry.entityId,
-        document: entry.document,
-        metadata: entry.metadata,
-        score: 0,
-        syncedAt: entry.syncedAt,
-        status: entry.status,
-        destination: entry.destination,
-      }));
+  try {
+    if (provider === 'pinecone') {
+      const remote = await queryPinecone({ workspaceId, query, limit, entityTypes });
+      if (remote.length > 0) {
+        return remote;
+      }
+    } else if (provider === 'custom') {
+      const remote = await queryCustomEndpoint({ workspaceId, query, limit, entityTypes });
+      if (remote.length > 0) {
+        return remote;
+      }
+    }
+  } catch (error) {
+    console.warn('Remote vector query failed, falling back to local index:', error);
   }
 
-  const queryEmbedding = await generateEmbedding(normalizedQuery);
-
-  return filtered
-    .map((entry) => ({
-      id: entry.id,
-      workspaceId: entry.workspaceId,
-      entityType: entry.entityType,
-      entityId: entry.entityId,
-      document: entry.document,
-      metadata: entry.metadata,
-      score: cosineSimilarity(queryEmbedding, entry.embedding),
-      syncedAt: entry.syncedAt,
-      status: entry.status,
-      destination: entry.destination,
-    }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
+  return queryLocalIndex({ workspaceId, query, limit, entityTypes });
 }
