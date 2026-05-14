@@ -38,6 +38,6 @@
 
 ## Roadmap & Future Directions
 
-- **Tool Calling Refinement (AI):** The immediate priority is executing a clean dependency audit for `ai` and `@ai-sdk/react` to allow server-side function calling (e.g., `prisma.lead.count()`) directly inside the `/api/chat` router.
+- **Tool Calling Refinement (AI):** Upgraded `ai` and `@ai-sdk/react` to their latest versions to support `tool()` executions. However, TypeScript compilation errors related to `DataStreamResponse` mismatches and strict generic parameters currently prevent stable execution inside Next.js 15 App Router. Rollbacked `/api/chat` to a standard text streaming endpoint pending future SDK alignment.
 - **RAG Architecture Sync (Completed):** Implemented real-time background sync pushing CRM activities into a Pinecone vector database using `text-embedding-3-small`, and wired the `/api/chat/route.ts` API to inject retrieved context into the LLM system prompt.
 - **Client Magic Links (Completed):** Implemented NextAuth Email Provider and Prisma Adapter to enable secure passwordless logins into the Client Portal.
