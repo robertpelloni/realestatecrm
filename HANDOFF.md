@@ -13,6 +13,8 @@
 - Executed Phase 3 RAG integration. `Activity` updates now sync to Pinecone in the background for LLM retrieval.
 - Cleaned all lingering TypeScript and React purity warnings.
 - Bumped version to `0.33.0`.
+- Finished building `queryVectorStore` to query Pinecone vectors on demand.
+- Embedded the RAG retrieval pipeline into the `/api/chat/route.ts` API so the LLM system prompt is automatically augmented with semantic context extracted from the user's CRM.
 
 **Next Steps for Next Model/Agent:**
 

@@ -39,5 +39,5 @@
 ## Roadmap & Future Directions
 
 - **Tool Calling Refinement (AI):** The immediate priority is executing a clean dependency audit for `ai` and `@ai-sdk/react` to allow server-side function calling (e.g., `prisma.lead.count()`) directly inside the `/api/chat` router.
-- **RAG Architecture Sync:** Implement the architectural blueprint defined in `docs/AI_RAG_STRATEGY.md` by hooking Prisma mutations (like new `Activity` entries) to a Vector database (Pinecone/Supabase) to give the LLM semantic context.
-- **Client Magic Links:** Replace standard credentials on the Portal with a NextAuth Email Provider logic for frictionless client onboarding.
+- **RAG Architecture Sync (Completed):** Implemented real-time background sync pushing CRM activities into a Pinecone vector database using `text-embedding-3-small`, and wired the `/api/chat/route.ts` API to inject retrieved context into the LLM system prompt.
+- **Client Magic Links (Completed):** Implemented NextAuth Email Provider and Prisma Adapter to enable secure passwordless logins into the Client Portal.
