@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import AddDealModal from '@/components/AddDealModal';
 import Link from 'next/link';
 import { dealSchema } from '@/lib/validations/deal';
+import { syncDealToVectorStore } from '@/lib/rag-sync';
 
 async function addDeal(formData: FormData) {
   'use server';
@@ -23,7 +24,7 @@ async function addDeal(formData: FormData) {
   const { title, value, stage, workspaceId, contactId } = validatedData.data;
 
   try {
-    await prisma.deal.create({
+    const deal = await prisma.deal.create({
       data: {
         title,
         value: value ? Number(value) : null,
@@ -32,6 +33,15 @@ async function addDeal(formData: FormData) {
         contactId,
       },
     });
+
+    const contact = contactId
+      ? await prisma.contact.findUnique({
+          where: { id: contactId },
+          select: { firstName: true, lastName: true, email: true },
+        })
+      : null;
+
+    await syncDealToVectorStore(deal, contact);
   } catch (error) {
     console.error('Failed to add deal:', error);
     return { error: 'An unexpected error occurred while saving.' };

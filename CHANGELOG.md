@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## [0.35.0] - Vector Embeddings & CRM Retrieval Wiring
+
+- Added OpenAI-backed embeddings with a deterministic local fallback for development.
+- Created a local vector index/outbox sync pipeline for activity, contact, lead, and deal records.
+- Switched AI chat context from keyword-only summaries to semantic retrieval from workspace-scoped vector matches.
+- Wired lead, contact, deal, and activity writes to sync into the vector store automatically.
+- Documented the new RAG/vector env vars and ignored local vector index artifacts in git.
+
 ## [0.1.0] - Initial Planning & Documentation
 
 - Created foundational documentation (VISION, MEMORY, DEPLOY, AGENTS, etc.).

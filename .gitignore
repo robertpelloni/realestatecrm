@@ -23,6 +23,7 @@ pnpm-debug.log*
 /.turbo
 /data/workflow-state.json
 /data/rag-outbox.json
+/data/vector-index.json
 
 # Python
 __pycache__/

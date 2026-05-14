@@ -42,8 +42,9 @@
 
 ## Phase 3 Roadmap Items (Continued)
 
-- [x] **Vector Sync Wiring:** Implement the background synchronization logic inside Prisma Server Actions to upsert `Activity` records to the Vector DB.
+- [x] **Vector Sync Wiring:** Implement the background synchronization logic inside Prisma Server Actions to upsert `Activity`, `Contact`, `Lead`, and `Deal` records to the Vector DB.
 - [x] **AI API Route:** Build the `/api/chat` route to retrieve vectors and stream responses back to `AIChat.tsx`.
+- [x] **Semantic Retrieval:** Upgrade chat context from keyword summaries to embeddings-powered workspace retrieval with a local fallback index.
 
 ## Release Checkpoint
 

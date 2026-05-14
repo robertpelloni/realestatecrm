@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import AddContactModal from '@/components/AddContactModal';
 import { contactSchema } from '@/lib/validations/contact';
+import { syncContactToVectorStore } from '@/lib/rag-sync';
 import Link from 'next/link';
 
 async function addContact(formData: FormData) {
@@ -24,7 +25,7 @@ async function addContact(formData: FormData) {
   const { firstName, lastName, email, phone, workspaceId } = validatedData.data;
 
   try {
-    await prisma.contact.create({
+    const contact = await prisma.contact.create({
       data: {
         firstName,
         lastName: lastName || null,
@@ -33,6 +34,8 @@ async function addContact(formData: FormData) {
         workspaceId,
       },
     });
+
+    await syncContactToVectorStore(contact);
   } catch (error) {
     console.error('Failed to add contact:', error);
     return { error: 'An unexpected error occurred while saving.' };

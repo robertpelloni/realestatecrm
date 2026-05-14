@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client';
 import AddLeadModal from '@/components/AddLeadModal';
 import Link from 'next/link';
 import { leadSchema } from '@/lib/validations/lead';
+import { syncContactToVectorStore, syncLeadToVectorStore } from '@/lib/rag-sync';
 
 async function addLead(formData: FormData) {
   'use server';
@@ -32,7 +33,7 @@ async function addLead(formData: FormData) {
       },
     });
 
-    await prisma.lead.create({
+    const lead = await prisma.lead.create({
       data: {
         status: 'NEW',
         score: 50,
@@ -41,6 +42,8 @@ async function addLead(formData: FormData) {
         contactId: contact.id,
       },
     });
+
+    await Promise.all([syncContactToVectorStore(contact), syncLeadToVectorStore(lead, contact)]);
   } catch (error) {
     console.error('Failed to add lead:', error);
     return { error: 'An unexpected error occurred while saving.' };
