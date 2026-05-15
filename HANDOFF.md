@@ -20,4 +20,4 @@
 
 1. **Vector Sync Wiring (Completed):** Finished RAG background data sync implementation in `0.33.0` which pushes CRM activities automatically to Pinecone.
 2. **AI Action/Function Calling:** Re-evaluate the `ai` module peer dependencies to strictly type the `tool()` calls so the LLM can securely query `Prisma` data in real-time.
-3. **Advanced Filtering:** Consider building a complex multi-select filtering component for the data tables to replace the basic `<select>` dropdowns.
+3. **Advanced Filtering (Completed):** Implemented `MultiSelectFilter` component and integrated it into the data tables (Leads, Tasks) to support complex multi-status filtering via `useSearchParams` array parsing.
