@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next';
 
 import { authOptions } from '@/lib/auth';
 import { buildDashboardCards, listCrmRecords, seedCrmRecordsIfEmpty } from '@/lib/crm-records';
-import { getWorkspaceSlug } from '@/lib/workspace-context';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 
 const workspaceHighlights = [
   'Live CRM records',
@@ -15,8 +15,8 @@ const workspaceHighlights = [
 export default async function DashboardPage() {
   await seedCrmRecordsIfEmpty();
   const session = await getServerSession(authOptions);
-  const workspaceSlug = getWorkspaceSlug(session);
-  const records = buildDashboardCards(await listCrmRecords({ workspaceSlug }));
+  const access = await requireWorkspaceAccess(session);
+  const records = buildDashboardCards(await listCrmRecords({ workspaceSlug: access.workspaceSlug }));
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(30,64,175,0.16),_transparent_32%),linear-gradient(180deg,_var(--background),_var(--background))] text-foreground">

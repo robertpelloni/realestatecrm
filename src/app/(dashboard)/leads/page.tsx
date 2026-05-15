@@ -1,7 +1,10 @@
+import { getServerSession } from 'next-auth/next';
 import prisma from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import AddLeadModal from '@/components/AddLeadModal';
 import Link from 'next/link';
+import { authOptions } from '@/lib/auth';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 import { leadSchema } from '@/lib/validations/lead';
 import { syncContactToVectorStore, syncLeadToVectorStore } from '@/lib/rag-sync';
 
@@ -22,6 +25,13 @@ async function addLead(formData: FormData) {
   }
 
   const { firstName, lastName, email, workspaceId } = validatedData.data;
+
+  const session = await getServerSession(authOptions);
+  const access = await requireWorkspaceAccess(session);
+
+  if (workspaceId !== access.workspaceId) {
+    return { error: 'Workspace access denied.' };
+  }
 
   try {
     const contact = await prisma.contact.create({
@@ -59,7 +69,11 @@ export default async function LeadsPage(props: {
   const currentPage = Math.max(1, Number(searchParams?.page) || 1);
   const pageSize = 10;
 
-  const whereClause: Prisma.LeadWhereInput = {};
+  const session = await getServerSession(authOptions);
+  const access = await requireWorkspaceAccess(session);
+  const workspaceId = access.workspaceId;
+  const whereClause: Prisma.LeadWhereInput = { workspaceId };
+
 
   if (query) {
     whereClause.OR = [

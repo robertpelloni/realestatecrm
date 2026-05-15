@@ -1,7 +1,10 @@
+import { getServerSession } from 'next-auth/next';
 import prisma from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import AddContactModal from '@/components/AddContactModal';
+import { authOptions } from '@/lib/auth';
 import { contactSchema } from '@/lib/validations/contact';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 import { syncContactToVectorStore } from '@/lib/rag-sync';
 import Link from 'next/link';
 
@@ -23,6 +26,13 @@ async function addContact(formData: FormData) {
   }
 
   const { firstName, lastName, email, phone, workspaceId } = validatedData.data;
+
+  const session = await getServerSession(authOptions);
+  const access = await requireWorkspaceAccess(session);
+
+  if (workspaceId !== access.workspaceId) {
+    return { error: 'Workspace access denied.' };
+  }
 
   try {
     const contact = await prisma.contact.create({
@@ -50,7 +60,10 @@ export default async function ContactsPage(props: {
   const currentPage = Math.max(1, Number(searchParams?.page) || 1);
   const pageSize = 10;
 
-  const whereClause: Prisma.ContactWhereInput = {};
+  const session = await getServerSession(authOptions);
+  const access = await requireWorkspaceAccess(session);
+  const workspaceId = access.workspaceId;
+  const whereClause: Prisma.ContactWhereInput = { workspaceId };
   if (query) {
     whereClause.OR = [
       { firstName: { contains: query } },

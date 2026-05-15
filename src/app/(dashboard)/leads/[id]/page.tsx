@@ -1,12 +1,18 @@
+import { getServerSession } from 'next-auth/next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import prisma from '@/lib/prisma';
 import AddActivityForm from '@/components/AddActivityForm';
+import { authOptions } from '@/lib/auth';
 import { createActivityAction as addActivity } from '@/lib/actions/activity';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const lead = await prisma.lead.findUnique({
-    where: { id: resolvedParams.id },
+  const session = await getServerSession(authOptions);
+  const access = await requireWorkspaceAccess(session);
+  const lead = await prisma.lead.findFirst({
+    where: { id: resolvedParams.id, workspaceId: access.workspaceId },
     include: {
       contact: true,
       workspace: true,

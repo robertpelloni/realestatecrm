@@ -46,6 +46,7 @@
 - [x] **AI API Route:** Build the `/api/chat` route to retrieve vectors and stream responses back to `AIChat.tsx`.
 - [x] **Semantic Retrieval:** Upgrade chat context from keyword summaries to embeddings-powered workspace retrieval with a local fallback index.
 - [x] **Hosted Vector Provider:** Finalize Pinecone/custom remote provider support with workspace-scoped query and upsert handling.
+- [x] **Auth Hardening:** Add middleware protection and server-side workspace access enforcement for authenticated CRM routes.
 
 ## Release Checkpoint
 

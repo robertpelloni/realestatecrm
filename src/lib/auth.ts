@@ -4,20 +4,59 @@ import type { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import EmailProvider from 'next-auth/providers/email';
 import prisma from './prisma';
+import { DEFAULT_WORKSPACE_SLUG } from './workspace-context';
 
 type AuthUser = NextAuthUser & {
   role?: string | null;
+  workspaceSlug?: string | null;
+  workspaceId?: string | null;
 };
 
 type AuthToken = JWT & {
   id?: string;
   role?: string | null;
+  workspaceSlug?: string | null;
+  workspaceId?: string | null;
 };
 
 type SessionUser = DefaultSession['user'] & {
   id?: string;
   role?: string | null;
+  workspaceSlug?: string | null;
+  workspaceId?: string | null;
 };
+
+async function resolvePrimaryWorkspace(userId: string) {
+  const membership = await prisma.workspaceMember.findFirst({
+    where: { userId },
+    orderBy: { workspaceId: 'asc' },
+    select: {
+      role: true,
+      workspaceId: true,
+    },
+  });
+
+  if (membership) {
+    return membership;
+  }
+
+  const fallbackWorkspace = await prisma.workspace.findFirst({
+    orderBy: { createdAt: 'asc' },
+    select: { id: true },
+  });
+
+  if (fallbackWorkspace) {
+    return {
+      role: 'AGENT',
+      workspaceId: fallbackWorkspace.id,
+    };
+  }
+
+  return {
+    role: 'AGENT',
+    workspaceId: DEFAULT_WORKSPACE_SLUG,
+  };
+}
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -44,23 +83,31 @@ export const authOptions: NextAuthOptions = {
             id: 'demo-user',
             name: process.env.AUTH_DEMO_NAME ?? 'Excel Legacy Admin',
             email: demoEmail,
+            role: 'OWNER',
+            workspaceSlug: DEFAULT_WORKSPACE_SLUG,
+            workspaceId: DEFAULT_WORKSPACE_SLUG,
           } satisfies AuthUser;
         }
 
         const user = await prisma.user.findUnique({
           where: { email },
+          select: { id: true, name: true, email: true, role: true },
         });
 
-        if (user) {
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          } satisfies AuthUser;
+        if (!user) {
+          return null;
         }
 
-        return null;
+        const workspace = await resolvePrimaryWorkspace(user.id);
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: workspace.role ?? user.role,
+          workspaceSlug: workspace.workspaceId,
+          workspaceId: workspace.workspaceId,
+        } satisfies AuthUser;
       },
     }),
   ],
@@ -72,6 +119,8 @@ export const authOptions: NextAuthOptions = {
         const typedUser = user as AuthUser;
         typedToken.id = typedUser.id;
         typedToken.role = typedUser.role ?? undefined;
+        typedToken.workspaceSlug = typedUser.workspaceSlug ?? undefined;
+        typedToken.workspaceId = typedUser.workspaceId ?? typedUser.workspaceSlug ?? undefined;
       }
 
       return typedToken;
@@ -83,6 +132,8 @@ export const authOptions: NextAuthOptions = {
       if (typedSession.user) {
         typedSession.user.id = typedToken.id;
         typedSession.user.role = typedToken.role ?? null;
+        typedSession.user.workspaceSlug = typedToken.workspaceSlug ?? null;
+        typedSession.user.workspaceId = typedToken.workspaceId ?? typedToken.workspaceSlug ?? null;
       }
 
       return typedSession;

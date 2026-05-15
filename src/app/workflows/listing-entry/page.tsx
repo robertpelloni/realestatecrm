@@ -8,7 +8,7 @@ import {
   buildListingSummaryItems,
   getCrmRecord,
 } from '@/lib/crm-records';
-import { getWorkspaceSlug } from '@/lib/workspace-context';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 
 function extractRecordId(searchParams: unknown) {
   if (!searchParams) return null;
@@ -103,8 +103,8 @@ type ListingEntryPageProps = {
 export default async function ListingEntryPage({ searchParams }: ListingEntryPageProps) {
   const recordId = extractRecordId(await Promise.resolve(searchParams));
   const session = await getServerSession(authOptions);
-  const workspaceSlug = getWorkspaceSlug(session);
-  const record = recordId ? await getCrmRecord(recordId, { workspaceSlug }) : null;
+  const access = await requireWorkspaceAccess(session);
+  const record = recordId ? await getCrmRecord(recordId, { workspaceSlug: access.workspaceSlug }) : null;
   const workflowId = recordId ? `listing-entry:${recordId}` : 'listing-entry';
   const displayRecord = record?.id === recordId ? record : null;
   const subtitle = displayRecord

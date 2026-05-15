@@ -1,7 +1,10 @@
+import { getServerSession } from 'next-auth/next';
 import prisma from '@/lib/prisma';
 import AddDealModal from '@/components/AddDealModal';
 import Link from 'next/link';
+import { authOptions } from '@/lib/auth';
 import { dealSchema } from '@/lib/validations/deal';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 import { syncDealToVectorStore } from '@/lib/rag-sync';
 
 async function addDeal(formData: FormData) {
@@ -22,6 +25,13 @@ async function addDeal(formData: FormData) {
   }
 
   const { title, value, stage, workspaceId, contactId } = validatedData.data;
+
+  const session = await getServerSession(authOptions);
+  const access = await requireWorkspaceAccess(session);
+
+  if (workspaceId !== access.workspaceId) {
+    return { error: 'Workspace access denied.' };
+  }
 
   try {
     const deal = await prisma.deal.create({
@@ -49,7 +59,12 @@ async function addDeal(formData: FormData) {
 }
 
 export default async function DealsPage() {
+  const session = await getServerSession(authOptions);
+  const access = await requireWorkspaceAccess(session);
+  const workspaceId = access.workspaceId;
+
   const deals = await prisma.deal.findMany({
+    where: { workspaceId },
     include: {
       contact: true,
     },
@@ -60,6 +75,7 @@ export default async function DealsPage() {
 
   const workspaces = await prisma.workspace.findMany();
   const contacts = await prisma.contact.findMany({
+    where: { workspaceId },
     orderBy: { firstName: 'asc' },
   });
 

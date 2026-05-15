@@ -1,8 +1,11 @@
 'use server';
 
+import { getServerSession } from 'next-auth/next';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
+import { authOptions } from '@/lib/auth';
 import { syncActivityToVectorStore } from '@/lib/rag-sync';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 import { activitySchema } from '@/lib/validations/activity';
 
 export async function createActivityAction(formData: FormData) {
@@ -22,6 +25,12 @@ export async function createActivityAction(formData: FormData) {
   }
 
   const data = validatedData.data;
+  const session = await getServerSession(authOptions);
+  const access = await requireWorkspaceAccess(session);
+
+  if (data.workspaceId !== access.workspaceId) {
+    return { error: 'Workspace access denied.' };
+  }
 
   try {
     const activity = await prisma.activity.create({

@@ -7,6 +7,7 @@ declare module 'next-auth' {
       role?: string;
       username?: string;
       workspaceSlug?: string;
+      workspaceId?: string;
     };
   }
 
@@ -15,6 +16,7 @@ declare module 'next-auth' {
     role?: string;
     username?: string;
     workspaceSlug?: string;
+    workspaceId?: string;
   }
 }
 
@@ -23,5 +25,6 @@ declare module 'next-auth/jwt' {
     role?: string;
     username?: string;
     workspaceSlug?: string;
+    workspaceId?: string;
   }
 }

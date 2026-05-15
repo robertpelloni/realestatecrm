@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## [0.37.0] - Auth Hardening & Workspace Permission Enforcement
+
+- Added middleware protection for authenticated dashboard, CRM, workflow, portal, and AI routes.
+- Introduced workspace access resolution based on authenticated NextAuth sessions instead of trusting raw client claims.
+- Scoped CRM list/detail queries and record-creation server actions to the active workspace.
+- Kept demo access and the file-backed CRM fallback intact for local development.
+
 ## [0.36.0] - Hosted Vector Provider Finalization
 
 - Added a provider switch for Pinecone or custom vector sync endpoints, with Pinecone auto-detection via environment variables.

@@ -8,7 +8,7 @@ import {
   buildOfferSummaryItems,
   getCrmRecord,
 } from '@/lib/crm-records';
-import { getWorkspaceSlug } from '@/lib/workspace-context';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 
 function extractRecordId(searchParams: unknown) {
   if (!searchParams) return null;
@@ -105,8 +105,8 @@ type OfferDraftPageProps = {
 export default async function OfferDraftPage({ searchParams }: OfferDraftPageProps) {
   const recordId = extractRecordId(await Promise.resolve(searchParams));
   const session = await getServerSession(authOptions);
-  const workspaceSlug = getWorkspaceSlug(session);
-  const record = recordId ? await getCrmRecord(recordId, { workspaceSlug }) : null;
+  const access = await requireWorkspaceAccess(session);
+  const record = recordId ? await getCrmRecord(recordId, { workspaceSlug: access.workspaceSlug }) : null;
   const workflowId = recordId ? `offer-draft:${recordId}` : 'offer-draft';
   const displayRecord = record?.id === recordId ? record : null;
   const subtitle = displayRecord

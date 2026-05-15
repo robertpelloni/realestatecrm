@@ -16,6 +16,7 @@ async function main() {
   // Create Workspace
   const workspace = await prisma.workspace.create({
     data: {
+      id: 'excel-legacy-team',
       name: 'Excel Legacy Realty Team',
     },
   });

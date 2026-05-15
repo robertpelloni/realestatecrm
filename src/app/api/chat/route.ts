@@ -2,7 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getWorkspaceSlug } from '@/lib/workspace-context';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 import { buildChatContext } from '@/lib/rag';
 
 export const maxDuration = 30;
@@ -10,9 +10,9 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   const { messages } = await req.json();
   const session = await getServerSession(authOptions);
-  const workspaceSlug = getWorkspaceSlug(session);
+  const access = await requireWorkspaceAccess(session);
   const latestUserMessage = [...messages].reverse().find((message) => message.role === 'user')?.content ?? '';
-  const workspaceContext = await buildChatContext({ workspaceSlug, query: latestUserMessage });
+  const workspaceContext = await buildChatContext({ workspaceSlug: access.workspaceSlug, query: latestUserMessage });
 
   const result = streamText({
     model: openai('gpt-4o'),

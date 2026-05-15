@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next';
 
 import { authOptions } from '@/lib/auth';
 import { buildDashboardCards, listCrmRecords, seedCrmRecordsIfEmpty } from '@/lib/crm-records';
-import { getWorkspaceSlug } from '@/lib/workspace-context';
+import { requireWorkspaceAccess } from '@/lib/workspace-access';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,8 +11,8 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   await seedCrmRecordsIfEmpty();
   const session = await getServerSession(authOptions);
-  const workspaceSlug = getWorkspaceSlug(session);
-  const records = await listCrmRecords({ workspaceSlug });
+  const access = await requireWorkspaceAccess(session);
+  const records = await listCrmRecords({ workspaceSlug: access.workspaceSlug });
 
   return NextResponse.json({
     count: records.length,
