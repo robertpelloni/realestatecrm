@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import AddTaskModal from '@/components/AddTaskModal';
 import { taskSchema } from '@/lib/validations/task';
+import MultiSelectFilter from '@/components/MultiSelectFilter';
 import Link from 'next/link';
 
 async function addTask(formData: FormData) {
@@ -41,11 +42,17 @@ async function addTask(formData: FormData) {
 }
 
 export default async function TasksPage(props: {
-  searchParams?: Promise<{ status?: string; q?: string; page?: string }>;
+  searchParams?: Promise<{ status?: string | string[]; q?: string; page?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.q || '';
-  const statusFilter = searchParams?.status || 'ALL';
+  const statusParam = searchParams?.status;
+  let statusFilter: string[] = [];
+  if (Array.isArray(statusParam)) {
+    statusFilter = statusParam;
+  } else if (typeof statusParam === 'string' && statusParam !== 'ALL') {
+    statusFilter = [statusParam];
+  }
   const currentPage = Math.max(1, Number(searchParams?.page) || 1);
   const pageSize = 10;
 
@@ -55,8 +62,8 @@ export default async function TasksPage(props: {
     whereClause.title = { contains: query };
   }
 
-  if (statusFilter && statusFilter !== 'ALL') {
-    whereClause.status = statusFilter;
+  if (statusFilter.length > 0) {
+    whereClause.status = { in: statusFilter };
   }
 
   const [tasks, totalCount] = await Promise.all([
@@ -95,24 +102,14 @@ export default async function TasksPage(props: {
             placeholder="Search tasks..."
             className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
-          <select
+          <MultiSelectFilter
             name="status"
-            defaultValue={statusFilter}
-            onChange={(e) => {
-              const form = e.target.form;
-              if (form) {
-                const pageInput = form.querySelector('input[name="page"]') as HTMLInputElement;
-                if (pageInput) pageInput.value = '1';
-                form.submit();
-              }
-            }}
-            className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="TODO">To Do</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="DONE">Done</option>
-          </select>
+            options={[
+              { label: 'To Do', value: 'TODO' },
+              { label: 'In Progress', value: 'IN_PROGRESS' },
+              { label: 'Done', value: 'DONE' },
+            ]}
+          />
           <input type="hidden" name="page" value={currentPage} />
           <button
             type="submit"
@@ -191,13 +188,13 @@ export default async function TasksPage(props: {
           </span>
           <div className="flex gap-2">
             <Link
-              href={`/tasks?q=${query}&status=${statusFilter}&page=${currentPage - 1}`}
+              href={`/tasks?${new URLSearchParams({ q: query, page: String(currentPage - 1) }).toString()}&${statusFilter.map(s => `status=${s}`).join('&')}`}
               className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}`}
             >
               Prev
             </Link>
             <Link
-              href={`/tasks?q=${query}&status=${statusFilter}&page=${currentPage + 1}`}
+              href={`/tasks?${new URLSearchParams({ q: query, page: String(currentPage + 1) }).toString()}&${statusFilter.map(s => `status=${s}`).join('&')}`}
               className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}`}
             >
               Next

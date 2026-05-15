@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import AddLeadModal from '@/components/AddLeadModal';
 import Link from 'next/link';
 import { leadSchema } from '@/lib/validations/lead';
+import MultiSelectFilter from '@/components/MultiSelectFilter';
 
 async function addLead(formData: FormData) {
   'use server';
@@ -47,11 +48,17 @@ async function addLead(formData: FormData) {
 }
 
 export default async function LeadsPage(props: {
-  searchParams?: Promise<{ status?: string; q?: string; page?: string }>;
+  searchParams?: Promise<{ status?: string | string[]; q?: string; page?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const query = searchParams?.q || '';
-  const statusFilter = searchParams?.status || 'ALL';
+  const statusParam = searchParams?.status;
+  let statusFilter: string[] = [];
+  if (Array.isArray(statusParam)) {
+    statusFilter = statusParam;
+  } else if (typeof statusParam === 'string' && statusParam !== 'ALL') {
+    statusFilter = [statusParam];
+  }
   const currentPage = Math.max(1, Number(searchParams?.page) || 1);
   const pageSize = 10;
 
@@ -65,8 +72,8 @@ export default async function LeadsPage(props: {
     ];
   }
 
-  if (statusFilter && statusFilter !== 'ALL') {
-    whereClause.status = statusFilter;
+  if (statusFilter.length > 0) {
+    whereClause.status = { in: statusFilter };
   }
 
   const [leads, totalCount] = await Promise.all([
@@ -107,25 +114,18 @@ export default async function LeadsPage(props: {
             placeholder="Search leads..."
             className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
           />
-          <select
+          <MultiSelectFilter
             name="status"
-            defaultValue={statusFilter}
-            onChange={(e) => {
-              // reset page on filter change
-              const form = e.target.form;
-              if (form) {
-                const pageInput = form.querySelector('input[name="page"]') as HTMLInputElement;
-                if (pageInput) pageInput.value = '1';
-                form.submit();
-              }
-            }}
-            className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="NEW">NEW</option>
-            <option value="CONTACTED">CONTACTED</option>
-            <option value="QUALIFIED">QUALIFIED</option>
-          </select>
+            options={[
+              { label: 'NEW', value: 'NEW' },
+              { label: 'CONTACTED', value: 'CONTACTED' },
+              { label: 'QUALIFIED', value: 'QUALIFIED' },
+              { label: 'PROPOSAL', value: 'PROPOSAL' },
+              { label: 'NEGOTIATION', value: 'NEGOTIATION' },
+              { label: 'CLOSED_WON', value: 'CLOSED_WON' },
+              { label: 'CLOSED_LOST', value: 'CLOSED_LOST' },
+            ]}
+          />
           <input type="hidden" name="page" value={currentPage} />
           <button
             type="submit"
@@ -216,13 +216,13 @@ export default async function LeadsPage(props: {
           </span>
           <div className="flex gap-2">
             <Link
-              href={`/leads?q=${query}&status=${statusFilter}&page=${currentPage - 1}`}
+              href={`/leads?${new URLSearchParams({ q: query, page: String(currentPage - 1) }).toString()}&${statusFilter.map(s => `status=${s}`).join('&')}`}
               className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}`}
             >
               Prev
             </Link>
             <Link
-              href={`/leads?q=${query}&status=${statusFilter}&page=${currentPage + 1}`}
+              href={`/leads?${new URLSearchParams({ q: query, page: String(currentPage + 1) }).toString()}&${statusFilter.map(s => `status=${s}`).join('&')}`}
               className={`px-3 py-1 border border-border rounded hover:bg-muted transition-colors ${currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}`}
             >
               Next
