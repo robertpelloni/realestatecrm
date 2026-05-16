@@ -1,5 +1,6 @@
 import prisma from './prisma';
 import { searchWorkspaceVectors } from './rag-sync';
+import { compactText } from './rag-utils';
 
 export type ChatContextInput = {
   workspaceSlug: string;
@@ -9,12 +10,6 @@ export type ChatContextInput = {
 function formatList(title: string, items: string[]) {
   if (items.length === 0) return `${title}: none found.`;
   return `${title}:\n- ${items.join('\n- ')}`;
-}
-
-function compactText(text: string, limit = 220) {
-  const normalized = text.replace(/\s+/g, ' ').trim();
-  if (normalized.length <= limit) return normalized;
-  return `${normalized.slice(0, limit - 1)}…`;
 }
 
 export async function buildChatContext({ workspaceSlug, query }: ChatContextInput) {

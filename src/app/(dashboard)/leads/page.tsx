@@ -157,11 +157,11 @@ export default async function LeadsPage(props: {
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-muted-foreground uppercase bg-muted/30">
               <tr>
-                <th className="px-6 py-3 font-medium">Name</th>
-                <th className="px-6 py-3 font-medium">Contact</th>
-                <th className="px-6 py-3 font-medium">Status</th>
-                <th className="px-6 py-3 font-medium">Score</th>
-                <th className="px-6 py-3 font-medium">Source</th>
+                <th className="px-6 py-3 font-medium" title="Full name of the lead">Name</th>
+                <th className="px-6 py-3 font-medium" title="Primary contact details">Contact</th>
+                <th className="px-6 py-3 font-medium" title="Current progression in the sales funnel">Status</th>
+                <th className="px-6 py-3 font-medium" title="AI-calculated priority score (0-100)">Score</th>
+                <th className="px-6 py-3 font-medium" title="Where this lead originated from">Source</th>
                 <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>

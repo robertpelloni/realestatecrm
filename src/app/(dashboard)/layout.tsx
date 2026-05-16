@@ -2,6 +2,8 @@ import AIChat from '@/components/AIChat';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import SignOutButton from '@/components/SignOutButton';
+import { getProjectVersion } from '@/lib/version';
+import { CommandPalette } from '@/components/CommandPalette';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -51,6 +53,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </a>
         </nav>
         <div className="p-4 border-t border-border">
+          <div className="mb-4 text-[10px] text-muted-foreground uppercase tracking-widest text-center">
+            Version {getProjectVersion()}
+          </div>
           <div className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted cursor-pointer transition-colors">
             <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-medium">
               {session?.user?.name?.[0] || 'U'}
@@ -76,7 +81,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
               E
             </div>
           </div>
-          <div className="flex-1"></div>
+          <div className="flex-1 flex justify-center px-4">
+            <CommandPalette />
+          </div>
           <div className="flex items-center gap-4">
             <button className="text-sm font-medium px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
               + New Deal

@@ -3,6 +3,7 @@ import path from 'node:path';
 import { embed } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import type { Activity, Contact, Deal, Lead } from '@prisma/client';
+import { displayName, formatCurrency } from './rag-utils';
 
 export type VectorEntityType = 'activity' | 'contact' | 'deal' | 'lead';
 
@@ -67,15 +68,6 @@ const VECTOR_INDEX_PATH = path.join(DATA_DIR, 'vector-index.json');
 const VECTOR_OUTBOX_PATH = path.join(DATA_DIR, 'rag-outbox.json');
 const DEFAULT_EMBEDDING_MODEL = process.env.RAG_EMBEDDING_MODEL?.trim() || 'text-embedding-3-small';
 const PINECONE_NAMESPACE = process.env.PINECONE_NAMESPACE?.trim() || 'realestatecrm';
-
-function displayName(firstName?: string | null, lastName?: string | null) {
-  return [firstName, lastName].filter(Boolean).join(' ').trim();
-}
-
-function formatCurrency(value?: number | null) {
-  if (value == null || Number.isNaN(Number(value))) return 'unpriced';
-  return `$${Number(value).toLocaleString('en-US')}`;
-}
 
 function tokenize(text: string) {
   return text.toLowerCase().match(/[a-z0-9@._-]+/g) ?? [];

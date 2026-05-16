@@ -1,8 +1,7 @@
 # GEMINI.md
 
-Please refer to [AGENTS.md](AGENTS.md) for universal instructions.
-Also see [GEMINI_IMPLEMENTATION_PROMPT.md](GEMINI_IMPLEMENTATION_PROMPT.md).
+Please refer to the [UNIVERSAL_INSTRUCTIONS.md](UNIVERSAL_INSTRUCTIONS.md) for core protocol, coding standards, and documentation requirements.
 
 **Gemini-Specific Instructions:**
-
-- Focus on rapid implementation and integrating AI/media workflows seamlessly.
+- Leverage Google Search capabilities for researching real estate regulations and technical documentation.
+- Provide comprehensive, step-by-step implementation plans.

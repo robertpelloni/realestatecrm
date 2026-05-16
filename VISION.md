@@ -13,8 +13,8 @@ To build a modular, AI-powered real estate CRM and operating system for the Exce
 
 ## Core Pillars
 
-1. **Intelligent CRM:** AI lead qualification, smart follow-ups, and automated routing.
-2. **Conversational Workflows:** Voice-first interactions allowing hands-free CRM updates and note-taking.
-3. **Omnichannel Communication:** Unified inbox connecting SMS, email, voice, and social channels.
-4. **Marketing & Media Studio:** Automated AI promotional video creation from property photos, and social publishing.
-5. **Ecosystem Integration:** Partner modules (mortgage, title, insurance) and deep integration with legacy MLS, Realist, BS&A, and Realcomp data.
+1. **Intelligent CRM:** AI lead qualification, smart follow-ups, and automated routing. Leveraging RAG (Retrieval-Augmented Generation) to provide agents with deep context on every lead and contact.
+2. **Conversational Workflows:** Voice-first interactions powered by state-of-the-art speech-to-text and LLMs, allowing agents to update the CRM, take notes, and trigger workflows hands-free while on the go.
+3. **Omnichannel Communication:** A unified communications hub that aggregates SMS, email, voice calls, and social media interactions (Facebook, Instagram, LinkedIn) into a single, searchable timeline for every contact.
+4. **Marketing & Media Studio:** An automated pipeline that transforms property photos into high-end promotional videos and social media posts, with AI-driven storyboard generation and automated publishing.
+5. **Ecosystem Integration:** Deep data hooks into legacy real estate systems (MLS, Realist, BS&A, Realcomp) and partner modules for mortgage, title, and insurance, creating a one-stop-shop for the entire transaction lifecycle.

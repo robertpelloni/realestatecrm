@@ -47,29 +47,36 @@ export default function AddLeadModal({
             )}
             <form action={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">First Name</label>
+                <label className="text-sm font-medium flex items-center gap-1" title="The lead's official first name">
+                  First Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   required
                   name="firstName"
                   type="text"
+                  placeholder="e.g. John"
                   className="w-full bg-muted/50 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 />
+                <p className="text-[10px] text-muted-foreground italic">Required for record identification.</p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Last Name</label>
+                <label className="text-sm font-medium" title="The lead's official last name or surname">Last Name</label>
                 <input
                   name="lastName"
                   type="text"
+                  placeholder="e.g. Doe"
                   className="w-full bg-muted/50 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Email</label>
+                <label className="text-sm font-medium" title="Primary contact email address">Email Address</label>
                 <input
                   name="email"
                   type="email"
+                  placeholder="john.doe@example.com"
                   className="w-full bg-muted/50 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                 />
+                <p className="text-[10px] text-muted-foreground italic">Used for automated follow-ups and portal access.</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Workspace</label>
