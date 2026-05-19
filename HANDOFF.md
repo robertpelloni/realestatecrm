@@ -1,16 +1,29 @@
-# HANDOFF.md
+# Handoff
 
-## Session History & Findings
+## Audited
+- Inspected the repository and found core features implemented (CRM Core, Workflows, Portal).
+- Identified Next.js dev server stability issues (ports locking up).
+- Reviewed documentation files and identified missing ones.
 
-**Current Session:**
+## Changed
+- Refactored `src/app/auth/signin/page.tsx` to handle `searchParams` as a Promise.
+- Updated `src/components/AddActivityForm.tsx` to include an Activity Type selector.
+- Cleaned up leftover workspace files.
+- Added missing project documentation files.
 
-- Hardened auth by adding middleware protection for authenticated app/API routes and introducing workspace access resolution from the authenticated NextAuth session.
-- Scoped CRM queries and create actions to the active workspace so leads, contacts, deals, and activity writes no longer trust client-supplied tenant claims.
-- Preserved demo/local fallback behavior while keeping the file-backed CRM flows intact.
-- Bumped version to `0.37.0`.
+## Tested
+- Fixed build error related to `any` type in `page.tsx`.
+- Ran `npm run build` and `npm run lint` successfully.
 
-**Next Steps for Next Model/Agent:**
+## Next Steps
+- Implement better CI/CD pipeline.
+- Fix Playwright tests to work consistently with the production build.
 
-1. **Deployment Readiness:** Confirm environment variables, database migration path, and production deployment checklist before shipping the next major feature slice.
-2. **Hosted Vector Ops:** If Pinecone is selected for production, add re-sync tooling or background retries for failed outbox items.
-3. **Workspace Expansion:** Add explicit multi-workspace switching/UI if the product needs brokers to access more than one tenant.
+
+## 0.39.0 Handoff
+- **Audited**: Checked core CRM functionalities, documentation gaps, and dev server stability (Next.js Turbopack port locking).
+- **Implemented**: Added Activity Type selection (`NOTE`, `CALL`, `EMAIL`, `SMS`, `MEETING`) in `AddActivityForm`.
+- **Fixed**: Resolved `searchParams` Promise unwrap error in Next.js 15 on the sign-in page.
+- **Library Inventory**: Added `docs/LIBRARIES.md`.
+- **Tested**: Verified build (`npm run build`), linting (`npm run lint`), and manual UI testing via Playwright screenshot.
+- **Next Steps**: Focus on stabilizing Playwright testing environments and refactoring RAG to be modular.

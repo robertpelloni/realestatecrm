@@ -79,3 +79,7 @@
 - [ ] Other approved property-data sources
 - [ ] Offer and listing draft prefill
 - [ ] Source provenance and review controls
+
+
+## 0.39.0 Update
+- Progress made on Activity logging (Phase 2), expanding communication features with specific Activity Types in forms.

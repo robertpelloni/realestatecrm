@@ -48,3 +48,7 @@
 - [ ] Evaluate Drizzle ORM for edge compatibility.
 - [ ] Robust port conflict handling for Playwright tests.
 - [ ] Implement WebSocket/WebRTC for real-time chat and voice.
+
+## 0.39.0 Backlog Adjustments
+- [x] Fix Next.js 15 `searchParams` unwrap issue on the signin page.
+- [x] Implement Activity Type selector (`NOTE`, `CALL`, `EMAIL`, `SMS`, `MEETING`) in `AddActivityForm`.

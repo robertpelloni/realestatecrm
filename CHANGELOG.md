@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+
+## [0.39.0] - 2026-05-19
+
+### Added
+- Activity Type selector (`NOTE`, `CALL`, `EMAIL`, `SMS`, `MEETING`) in the Add Activity form.
+
+### Fixed
+- Next.js 15 `searchParams` Promise unwrap error on the signin page.
+
 ## [0.37.0] - Auth Hardening & Workspace Permission Enforcement
 
 - Added middleware protection for authenticated dashboard, CRM, workflow, portal, and AI routes.
