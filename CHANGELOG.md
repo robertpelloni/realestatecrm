@@ -1,6 +1,14 @@
 # CHANGELOG.md
 
 
+
+## [0.40.0] - 2026-05-19
+
+### Added
+- Global Search Command Palette (`Ctrl+K`/`Cmd+K`) implemented using `cmdk` for cross-entity querying across Leads, Contacts, Deals, and Tasks.
+- Dedicated `/api/search` route for performant cross-entity querying.
+
+
 ## [0.39.0] - 2026-05-19
 
 ### Added

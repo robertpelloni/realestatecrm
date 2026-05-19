@@ -24,7 +24,7 @@
 - [x] Feature Expansion: Filtering, sorting, and pagination across all data tables.
 - [x] Feature Expansion: Task deadlines and assignment.
 - [ ] UI Polish: Add comprehensive tooltips, labels, and descriptions to all CRM views and forms.
-- [ ] Global Search: Implement a Command Palette (`cmdk`) for cross-entity searching.
+- [x] Global Search: Implement a Command Palette (`cmdk`) for cross-entity searching.
 
 ### Workflow Engine
 - [x] Workflow Session model and backend persistence.
