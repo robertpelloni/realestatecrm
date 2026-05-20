@@ -18,7 +18,7 @@
 
 ## Phase 3 — AI and voice [IN PROGRESS]
 - [x] AI Assistant UI and Backend (AIChat)
-- [x] RAG (Retrieval-Augmented Generation) foundation and vector sync
+- [x] RAG (Retrieval-Augmented Generation) foundation, vector sync, and unification
 - [ ] AI lead qualification
 - [ ] Voice assistant
 - [ ] Speech provider selection

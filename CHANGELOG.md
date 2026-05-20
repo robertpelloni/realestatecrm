@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## [0.39.0] - RAG Consolidation & Code Clean-up
+
+- Consolidated RAG vector sync and query logic by merging `src/lib/rag-sync.ts` into `src/lib/rag.ts`.
+- Re-routed all references from `rag-sync.ts` across the application to `rag.ts`.
+- Resolved residual type errors related to Prisma queries in CRM layouts and Activity server actions.
+
 ## [0.37.0] - Auth Hardening & Workspace Permission Enforcement
 
 - Added middleware protection for authenticated dashboard, CRM, workflow, portal, and AI routes.

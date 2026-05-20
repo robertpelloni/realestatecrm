@@ -11,4 +11,9 @@ The application is planned to be a TypeScript-based web platform (likely Next.js
 - **Build Command:** `npm run build`
 - **Start Command:** `npm start`
 
+### Environment Setup
+If you are planning to deploy with Pinecone as your hosted vector provider, be sure to set the following in your deployment environment variables:
+- `PINECONE_API_KEY`
+- `PINECONE_NAMESPACE` (optional)
+
 _Note: Detailed deployment steps will be fleshed out once the TypeScript scaffold is fully implemented._

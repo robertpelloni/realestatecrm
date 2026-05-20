@@ -4,10 +4,10 @@
 
 **Current Session:**
 
-- Hardened auth by adding middleware protection for authenticated app/API routes and introducing workspace access resolution from the authenticated NextAuth session.
-- Scoped CRM queries and create actions to the active workspace so leads, contacts, deals, and activity writes no longer trust client-supplied tenant claims.
-- Preserved demo/local fallback behavior while keeping the file-backed CRM flows intact.
-- Bumped version to `0.37.0`.
+- Audited documentation and consolidated model-specific and universal agent instructions (`AGENTS.md`, `CLAUDE.md`, etc.) to the repository root.
+- Consolidated RAG vector sync and query logic by merging `src/lib/rag-sync.ts` into `src/lib/rag.ts` and updating all references across the app.
+- Fixed unrelated TypeScript errors in `src/lib/actions/activity.ts` and workflow routes.
+- Bumped version to `0.39.0`.
 
 **Next Steps for Next Model/Agent:**
 

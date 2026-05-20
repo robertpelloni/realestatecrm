@@ -42,7 +42,7 @@
 - [x] Vector Sync Wiring (Prisma -> Vector DB).
 - [x] Semantic Retrieval (RAG context injection).
 - [x] Workspace-aware RAG sync.
-- [ ] RAG Consolidation: Refactor overlapping logic in `src/lib/rag.ts` and `src/lib/rag-sync.ts`.
+- [x] RAG Consolidation: Refactor overlapping logic in `src/lib/rag.ts` and `src/lib/rag-sync.ts`.
 
 ## Tech Debt & Improvements
 - [ ] Evaluate Drizzle ORM for edge compatibility.
