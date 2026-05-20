@@ -31,7 +31,7 @@ export function SignInForm({ error }: SignInFormProps) {
 
     try {
       await signIn('credentials', {
-        email: username,
+        username,
         password,
         callbackUrl: '/dashboard',
         redirect: true,
