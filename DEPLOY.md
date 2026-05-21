@@ -1,15 +1,14 @@
-# DEPLOY.md
+# Deployment
 
-## Deployment Strategy
+## Setup Instructions
 
-The application is planned to be a TypeScript-based web platform (likely Next.js or similar) with a mobile counterpart (React Native/Expo).
+1. Install dependencies:
+   `npm install`
 
-### Backend & Frontend (Web)
+2. Generate Prisma client:
+   `npx prisma generate`
 
-- **Hosting:** To be determined (Vercel/AWS/Render recommended for Next.js).
-- **CI/CD:** GitHub Actions will be configured to automatically run tests, linting, and build steps.
-- **Build Command:** `npm run build`
-- **Start Command:** `npm start`
+3. Setup environment variables (copy `.env.example` to `.env`).
 
 ### Environment Setup
 If you are planning to deploy with Pinecone as your hosted vector provider, be sure to set the following in your deployment environment variables:

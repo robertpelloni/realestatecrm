@@ -208,3 +208,12 @@
 - Added a RAG sync helper with a remote vector endpoint path and a local outbox fallback at `data/rag-outbox.json`.
 - Upgraded the chat API to inject workspace-aware CRM context before streaming responses.
 - Kept the dashboard contact, lead, and deal activity screens wired to the shared server action for consistent sync behavior.
+
+## [0.41.0] - UI Polish: Comprehensive Tooltips
+
+- Added `@radix-ui/react-tooltip` and scaffolded the base `Tooltip` component via Shadcn patterns.
+- Integrated `TooltipProvider` globally into `Providers.tsx`.
+- Implemented contextual tooltips across Dashboard Home metric cards.
+- Implemented header explanation tooltips on the Leads, Deals, Contacts, and Tasks list pages.
+- Added field-level help tooltips to complex inputs in the `AddLeadModal` and `AddActivityForm`.
+- Fixed Next.js linting errors related to unescaped apostrophes in UI copy.
