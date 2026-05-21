@@ -23,7 +23,7 @@
 - [x] UI Polish: Add loading states and Toast notifications.
 - [x] Feature Expansion: Filtering, sorting, and pagination across all data tables.
 - [x] Feature Expansion: Task deadlines and assignment.
-- [ ] UI Polish: Add comprehensive tooltips, labels, and descriptions to all CRM views and forms.
+- [x] UI Polish: Add comprehensive tooltips, labels, and descriptions to all CRM views and forms.
 - [x] Global Search: Implement a Command Palette (`cmdk`) for cross-entity searching.
 
 ### Workflow Engine
@@ -46,7 +46,7 @@
 
 ## Tech Debt & Improvements
 - [ ] Evaluate Drizzle ORM for edge compatibility.
-- [ ] Robust port conflict handling for Playwright tests.
+- [x] Robust port conflict handling for Playwright tests.
 - [ ] Implement WebSocket/WebRTC for real-time chat and voice.
 
 ## 0.39.0 Backlog Adjustments
